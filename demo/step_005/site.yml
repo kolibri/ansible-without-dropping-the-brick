@@ -9,6 +9,7 @@
       become: true
       package:
         name:
+          - openssh-server
           - git
           - zsh
         state: present
@@ -37,3 +38,28 @@
             name: excludesfile,
             value: "{{ ansible_user_dir }}/.gitignore",
           }
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+
+
