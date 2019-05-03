@@ -1,0 +1,19 @@
+# site.yml
+---
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  tasks:
+    - debug: var=hostvars
+    - name: ensure git is installed
+      become: true
+      package: 
+        name: git
+        state: present
+
+    - name: ensure git configs
+      template:
+        src: gitconfig.j2
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+

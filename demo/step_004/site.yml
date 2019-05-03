@@ -1,0 +1,35 @@
+# site.yml
+---
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package: 
+        name: 
+          - git
+          - zsh
+        state: present
+
+    - name: ensure aliases for zsh
+      lineinfile:
+        dest: "{{ ansible_user_dir }}/.zshrc"
+        line: "ALIAS {{ item }}"
+      loop:
+        - dog=cat
+        - yolo=sudo
+
+    - name: ensure git config
+      ini_file:
+        dest:    "{{ ko_user_home }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option:  "{{ item.name }}"
+        value:   "{{ item.value }}"
+      loop:
+        - { ns: user, name: email,        value: "{{ git_user_mail }}" }
+        - { ns: user, name: name,         value: "{{ git_user_name }}" }
+        - { ns: push, name: default,      value: simple }
+        - { ns: core, name: excludesfile, value: "{{ ansible_user_dir }}/.gitignore" }
+
