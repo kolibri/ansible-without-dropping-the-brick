@@ -1,0 +1,238 @@
+import { CodeSurfer } from "mdx-deck-code-surfer"
+import { Notes } from 'mdx-deck'
+export { components } from "mdx-deck-code-surfer"
+export { swiss as theme } from 'mdx-deck/themes'
+import Pitfall from './layouts/Pitfall'
+import Tip from './layouts/Tip'
+
+
+# Ansible without dropping a brick
+
+---
+
+# Who is this guy
+
+ Lukas Sadzik <lukas.sadzik@sensiolabs.de>  
+Software Developer & Trainer @ SensioLabsDE  
+Automation Fan  
+@ko_libri  
+
+<Notes>
+- who uses vagrant
+- Who already used ansible
+- who has to handle more than two/ten/twenty/hundret machines?
+- Code examples are for demonstration only!
+</Notes>
+
+---
+
+# The Problem.
+
+## What we want
+
+---
+
+- We need more/less webservers/containers/ec2instances/etc, (scaling)
+- We have to setup ssl/upgrade php/remove ssh access for the po/etc. on some of/all our servers (maintenance)
+- We want to know, what is installed/configured on our machines (documentation)
+- We want to approve every change the trainee makes on our machines (reviewability)
+- We need to discuss the setup or our infrastructure (teamwork and knowledge sharing)
+- We need development vm's for our developers (singe point of truth)
+- And we want it, when we need it (automation)
+
+---
+
+# Quick tool overview
+
+
+- [Chef](https://www.chef.io/)
+- [Puppet](https://puppet.com/)
+- [SaltStack](https://www.saltstack.com/)
+- [Ansible](https://www.ansible.com) (this is, what this talk is about)
+
+---
+
+# About Ansible
+
+- Open source (GPL) and available on [github](https://github.com/ansible/ansible)
+- Maintained and owned by Redhat
+- written in python
+- configured with YAML files (sorry [Marco](https://twitter.com/Ocramius) ;)
+
+---
+
+# How to install ansible
+
+- Via yor favourite/available package manager
+
+`(pacman -S)/(apt-get/brew/yum/pip install) ansible`
+
+---
+
+export default Pitfall
+
+There are a lot of installation methods mentioned on the installation guide.
+
+Just take the most easiest for you.
+
+Do not install ansible via Git, unless you know, what you are doing
+
+---
+
+# How does ansible work
+
+---
+
+# The usual setup
+
+- One control machine
+- Some managed machines
+
+---
+
+# The control machine
+
+The only machine we interact with directly is the control machine.
+It has ansible installed and our self written scripts checked out.
+
+---
+
+# The managed machines
+
+We do not log in onto this machines manualy (in a perfect world, we would not have access to this machines)
+The only need python (=> 2.7) or Python 3 (>= 3.5) installed
+And, our control machine has to be able to connect to the managed machines.
+
+---
+
+# Assistested quickstart with Vagrant
+
+
+---
+
+```ruby
+# ./Vagrantfile
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "debian/stretch64"
+    config.vm.host_name = "ansible-quickstart.foo"
+    config.vm.provision "ansible_local" do |ansible|
+        ansible.playbook = "site.yml"
+        ansible.verbose = true
+    end
+end
+----
+8:11
+```
+
+---
+
+```yaml
+# ./site.yml
+- hosts: all
+  tasks:
+    - name: Greet someone
+      shell: echo 'Hello World'
+```
+
+---
+
+```bash
+# starting the box (provisioning is only executed when the box is created)
+$ vagrant up
+# run the provisioning manually
+$ vagrant provision
+```
+
+---
+
+# First concepts of Ansible
+
+---
+
+## Playbooks
+
+
+YAML-files, that are executed by the `ansible-playbook` command.
+
+Assigns tasks (and/or roles) to a hosts, where they should be applied.
+
+---
+
+
+## Tasks
+
+Single step during the playbook run.
+
+They represent the concrete use of a module.
+
+---
+
+### Task examples
+
+- Ensure that file `$xxy` exists with this content (`template`, `copy`)
+- Ensure service `$abc` is running (`service`)
+- Ensure user `foobar` exists and has no sudo privilege (`user`)
+- Deploy `$app` to prod (`deploy_helper`)
+- Run script `take_world_leadership.sh` (`shell`, `command`)
+- Ensure this git repo is checked out and at the current commit of that branch (`git`)
+
+---
+
+export default Pitfall
+
+Always name your tasks!  
+Name them unique and meaningfull.
+
+
+This allows you to use the  `--start-at-task` option of `ansible-playbook`
+
+
+---
+
+export default Tip
+
+Call ansible at least with the first verbosity level (`ansible-playbook -v`).
+
+This will show you details about the executed tasks, that may have useful informations.
+
+---
+
+
+# Writing our first tasks
+
+Install git and place a config file for the user
+
+---
+
+
+```ini
+#  ./gitconfig.dist
+[user]
+    email = tamara.tester@testingen.foo
+    name = Tamara Tester
+[core]
+    excludesfile = /home/vagrant/.gitignore
+    editor = vi
+```
+
+---
+
+```yaml
+# ./site.yml 
+- hosts: all
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name: git
+        state: present
+    - name: ensure git configs
+      copy:
+        src: gitconfig.dist
+        dest: /home/vagrant/.gitconfig
+```
+
+---

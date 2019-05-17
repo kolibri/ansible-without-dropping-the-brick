@@ -11,8 +11,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "mdx-deck --no-open -p=3137 index.mdx",
-    "build": "mdx-deck build index.mdx"
+    "start": "mdx-deck slides.mdx",
+    "build": "mdx-deck build --no-html slides.mdx"
 
   },
   "author": "",
