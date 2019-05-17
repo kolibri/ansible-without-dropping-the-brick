@@ -1,12 +1,32 @@
 import { CodeSurfer } from "mdx-deck-code-surfer"
+import { Notes } from 'mdx-deck'
 export { components } from "mdx-deck-code-surfer"
+export { swiss as theme } from 'mdx-deck/themes'
 
-
-# This is the title of my deck
+# Ansible without dropping a brick
 
 ---
 
-```yaml siter.yml
+# Who is this guy
+
+ Lukas Sadzik <lukas.sadzik@sensiolabs.de>  
+Software Developer & Trainer @ SensioLabsDE  
+Automation Fan  
+@ko_libri  
+
+<Notes>
+- who uses vagrant
+- Who already used ansible
+- who has to handle more than two/ten/twenty/hundret machines?
+- Code examples are for demonstration only!
+</Notes>
+
+
+---
+
+---
+
+```yaml
 # site.yml
 - hosts: all
   tasks:
@@ -21,7 +41,7 @@ export { components } from "mdx-deck-code-surfer"
         dest: /home/vagrant/.gitconfig
 
 ----
-1 > for all hosts
-3:6 > install package
-7:10 > Some tokens
+2 
+4, 9 
+4[5:36], 9[5:31] 
 ```

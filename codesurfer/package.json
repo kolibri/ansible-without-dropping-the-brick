@@ -11,7 +11,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "mdx-deck index.mdx"
+    "start": "mdx-deck --no-open -p=3137 index.mdx",
+    "build": "mdx-deck build index.mdx"
+
   },
   "author": "",
   "license": "ISC"

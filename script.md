@@ -1,14 +1,3 @@
-# Chapters:
-
-000_intro
-010_what_is_ansible
-020_quickstart_playbooks_and_tasks
-030_facts_variables_and_templates
-040_loops
-050_handlers
-
----
-
 # Ansible without dropping a brick
 
 ---
