@@ -1,0 +1,27 @@
+import { CodeSurfer } from "mdx-deck-code-surfer"
+export { components } from "mdx-deck-code-surfer"
+
+
+# This is the title of my deck
+
+---
+
+```yaml siter.yml
+# site.yml
+- hosts: all
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package: 
+        name: git
+        state: present
+    - name: ensure git configs
+      copy:
+        src: gitconfig.dist
+        dest: /home/vagrant/.gitconfig
+
+----
+1 > for all hosts
+3:6 > install package
+7:10 > Some tokens
+```

@@ -1,0 +1,18 @@
+{
+  "name": "codesurfer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "mdx-deck": "^1.7.7",
+    "mdx-deck-code-surfer": "^0.5.5",
+    "raw-loader": "^0.5.1",
+    "styled-components": "^4.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "mdx-deck index.mdx"
+  },
+  "author": "",
+  "license": "ISC"
+}
