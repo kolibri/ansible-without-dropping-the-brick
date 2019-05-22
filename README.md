@@ -1,6 +1,6 @@
 # Ansible ohne Fettnäpchen.
 
-A beginner talk about (Ansible)[http://ansible.com] 
+A beginner talk about [Ansible](http://ansible.com)
 
 ## Commands 
 
