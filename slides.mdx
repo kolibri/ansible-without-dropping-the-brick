@@ -119,7 +119,7 @@ Vagrant.configure("2") do |config|
     config.vm.box = "debian/stretch64"
     config.vm.host_name = "ansible-quickstart.foo"
     config.vm.provision "ansible_local" do |ansible|
-        ansible.playbook = "site.yml"
+        ansible.playbook = "playbook.yml"
         ansible.verbose = true
     end
 end
@@ -130,7 +130,7 @@ end
 ---
 
 ```yaml
-# ./site.yml
+# ./playbook.yml
 - hosts: all
   tasks:
     - name: Greet someone
@@ -201,7 +201,7 @@ This will show you details about the executed tasks, that may have useful inform
 ---
 
 
-# Writing our first tasks
+# Writing our first Playbook
 
 Install git and place a config file for the user
 
@@ -221,7 +221,7 @@ Install git and place a config file for the user
 ---
 
 ```yaml
-# ./site.yml 
+# ./playbook.yml 
 - hosts: all
   tasks:
     - name: ensure git is installed
@@ -233,6 +233,141 @@ Install git and place a config file for the user
       copy:
         src: gitconfig.dist
         dest: /home/vagrant/.gitconfig
+----
+*
+2 > address hosts
+4:8 > ensures packages
+9:12 > copy files from control to remote
+5
 ```
 
 ---
+
+# Understanding `become`
+
+---
+@todo: Add short description about "become"
+---
+
+
+```yaml
+# become default configuration
+become: false
+become_user: root 
+become_method: sudo 
+become_flags: ~
+----
+*
+2 > activates privilege escalation.
+3 > specify user to become
+4 > define method to become user 
+5 > add extra flags
+```
+
+---
+
+export default Pitfall
+
+
+Setting `become_user`, `become_method` or `become_flags` does NOT imply `become: true`.
+
+This means, you can configure `become_user/method/flags` globally or for a group of tasks and still enable become only for when you need it.
+
+---
+
+export default Pitfall
+
+Ansible does not create a new connection to become another user.
+The user you use for connecting to the remote must be able to perform the `become`.
+
+Imagine, you ssh into the machine and then call a command with `sudo`.
+This is the same for ansible.
+
+---
+
+export default Tip
+
+`become` can do more than gaining admin priviliges.
+You can use it, to perform tasks as another user on your system.
+Keep this in mind, when you have to deal with multiple user accounts.
+
+---
+
+```yaml
+# ./playbook.yml 
+- hosts: all
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name: git
+        state: present
+    - name: ensure git configs
+      copy:
+        src: gitconfig.dist
+        dest: /home/vagrant/.gitconfig
+----
+9:12
+```
+
+---
+
+export default Tip
+
+Name the source files for dotfiles without the dot.
+
+This makes them more present and every tool can view them without any configuration.
+
+---
+
+# Introduction into facts
+
+---
+
+```yaml
+# ./site.yml
+- hosts: all
+  tasks:
+    - debug: var=hostvars
+----
+4 > print out all kown facts
+```
+
+---
+
+```bash
+TASK [debug] ***********************************************
+ok: [default] => {
+    "hostvars": {
+        "default": {
+            // [...],
+            "ansible_user_dir": "/home/vagrant",
+            "ansible_user_gecos": "Vagrant Default User,,,",
+            "ansible_user_gid": 1000,
+            "ansible_user_id": "vagrant",
+            "ansible_user_shell": "/bin/bash",
+            "ansible_user_uid": 1000,
+            "ansible_userspace_architecture": "x86_64",
+            "ansible_userspace_bits": "64",
+            // [...],
+        }
+    }
+}
+----
+*
+6
+```
+
+---
+
+
+```diff 
+ - name: ensure git configs
+   copy:
+     src: gitconfig.dist
+-    dest: /home/vagrant/.gitconfig
++    dest: "{{ ansible_user_dir }}/.gitconfig"
+----
+*
+```
+

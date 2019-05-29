@@ -219,7 +219,7 @@ Start with the first one:
 
 The next new thing you might have noticed is the `become: true` directive at the `package` task.
 
-# Understaing `become`
+# Understanding `become`
 
 Most Operating systems have some kind of user and user previliges system. If you are familiar with Unix systems, you should already know about this from your daily work.
 
