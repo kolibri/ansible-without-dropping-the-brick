@@ -332,7 +332,6 @@ This makes them more present and every tool can view them without any configurat
 ----
 4 > print out all kown facts
 ```
-
 ---
 
 ```bash
@@ -355,7 +354,7 @@ ok: [default] => {
 }
 ----
 *
-6
+6 > We need this
 ```
 
 ---
@@ -371,3 +370,76 @@ ok: [default] => {
 *
 ```
 
+---
+
+
+export default Pitfall
+
+We have to write valid YAML files.
+
+This means, we have to surround Jinja2 statements with quotation marks:
+
+`dest: {{ my_fact }}/foo` will cause an error.
+
+`dest: "{{ my_fact }}/foo"`  will do the job.
+
+---
+
+
+# Facts are global per run
+
+
+```yaml
+- hosts: all
+  vars:
+    my_var: foobar
+  tasks:
+    - debug: var=my_var
+
+- hosts: all
+  tasks:
+    - debug: var=my_var
+----
+*
+1:5 > { "my_var": "foobar" }
+6:9 > { "my_var": "VARIABLE IS NOT DEFINED!" }
+```
+
+---
+
+# Templates
+
+---
+
+
+```yaml
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: tamara@tester.de
+    git_user_name: tamara Tester
+  tasks:
+    - name: ensure git configs
+      template:
+        src: gitconfig.j2
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+----
+*
+3:5 > define variable inside playbook
+7:10 > ensure parsed template on remote
+```
+
+---
+
+```ini
+# gitconfig.j2
+[user]
+    email = {{ git_user_email }}
+    name = {{ git_user_name }}
+[core]
+    excludesfile = {{ ansible_user_dir }}/.gitignore
+    editor = nano
+----
+*
+3[0] > use variable
+```
