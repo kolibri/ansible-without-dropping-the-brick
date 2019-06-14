@@ -1,9 +1,10 @@
+import { Split } from 'mdx-deck/layouts'
 import { CodeSurfer } from "mdx-deck-code-surfer"
 import { Notes } from 'mdx-deck'
-export { components } from "mdx-deck-code-surfer"
-export { swiss as theme } from 'mdx-deck/themes'
 import Pitfall from './layouts/Pitfall'
 import Tip from './layouts/Tip'
+export { components } from "mdx-deck-code-surfer"
+export { swiss as theme } from 'mdx-deck/themes'
 
 
 # Ansible without dropping a brick
@@ -63,7 +64,7 @@ Automation Fan
 
 # How to install ansible
 
-- Via yor favourite/available package manager
+- Via your favourite/available package manager
 
 `(pacman -S)/(apt-get/brew/yum/pip install) ansible`
 
@@ -441,5 +442,224 @@ This means, we have to surround Jinja2 statements with quotation marks:
     editor = nano
 ----
 *
-3[0] > use variable
+3,4 > variable from playbook
+6 > variable from facts
 ```
+
+---
+
+export default Tip
+
+Always add the `.j2` file extension to your templates.
+
+Also add the ending fo the target file format, if there is one.
+
+Example: `vhost.conf.j2`. With this, you can easily spot, that this file is a template and the rendered result will be a `*.conf` file.
+
+---
+
+
+# Loops
+
+---
+
+# Extending our first Playbook
+
+Install zsh and place some aliases
+
+---
+
+```yaml
+- hosts: all
+  tasks:
+    - name: ensure git and zsh is installed
+      become: true
+      package:
+        name:
+          - git
+          - zsh
+        state: present
+
+    - name: ensure useful aliases for zsh
+      lineinfile:
+        create: yes
+        dest: "{{ ansible_user_dir }}/.zshrc"
+        line: "alias {{ item }}"
+      loop:
+        - "dog=cat"
+        - "yolo=sudo"
+----
+*
+6:8 > inline style for package related modules
+15:18 > regular style with loop/item
+```
+
+---
+
+```bash
+# ~/.zshrc 
+alias dog=cat
+alias yolo=sudo
+```
+
+---
+
+# @todo: Maybe add section about `loop_control`
+
+---
+
+
+```yaml
+- name: ensure git config
+  ini_file:
+    dest: "{{ ansible_user_dir }}/.gitconfig"
+    section: "{{ item.ns }}"
+    option: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - { ns: user, name: email,   value: "{{ git_user_mail }}" }
+    - { ns: user, name: name,    value: "{{ git_user_name }}" }
+    - { ns: push, name: default, value: simple }
+    - { 
+        ns: core,
+        name: excludesfile, 
+        value: "{{ ansible_user_dir }}/.gitignore" 
+      }
+```
+
+---
+
+# Handlers
+
+Executing tasks at the end of play, if we need it.
+
+---
+
+# But before: Tasks return informations
+
+@todo Add slides about tasks return stuff
+
+---
+
+```yaml
+# site.yml
+- hosts: all
+   tasks:
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+----
+*
+4:11 > Disable root login in ssh config file
+12:17 > enable the ssh service on startup
+19 > Start handlers section (same indention level as "tasks")
+20:24 > restart ssh service
+11, 17, 20 > notify the task inside handlers
+```
+
+---
+
+export default Tip
+
+Handlers are just tasks. You can use the same modules here.
+
+---
+
+export default Pitfall
+
+Do not start or restart your services at task level. Just enable them with the `service` module and add a notify to the restarting handler.
+
+---
+
+export default Pitfall
+
+Handlers are only executed, when at least one of the notifying tasks get the `changed` state during the playbook run.
+
+---
+
+# Roles
+
+Make things reusable
+
+---
+
+```bash
+$ ansible-galaxy init --init-path=roles zsh
+- zsh was created successfully
+$ tree
+.
+├── roles
+│   └── zsh
+│       ├── defaults
+│       │   └── main.yml
+│       ├── files
+│       ├── handlers
+│       │   └── main.yml
+│       ├── meta
+│       │   └── main.yml
+│       ├── README.md
+│       ├── tasks
+│       │   └── main.yml
+│       ├── templates
+│       ├── tests
+│       │   ├── inventory
+│       │   └── test.yml
+│       └── vars
+│           └── main.yml
+└── site.yml
+```
+
+---
+
+
+```bash
+.
+├── roles
+│   └── zsh
+│       └── tasks
+│           └── main.yml
+└── site.yml
+```
+
+---
+
+---
+
+export default Split
+
+```bash
+.
+├── roles
+│   └── zsh
+│       └── tasks
+│           └── main.yml
+└── site.yml
+```
+
+```bash
+.
+├── roles
+│   └── zsh
+│       └── tasks
+│           └── main.yml
+└── site.yml
+```
+

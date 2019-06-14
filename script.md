@@ -576,12 +576,30 @@ Inside this file we now move all tasks from the playbook that are related to zsh
 
 ```
 # roles/zsh/tasks/main.yml
+- name: ensure zsh is installed
+  become: true
+  package:
+    name: zsh
+    state: present
+
+- name: ensure aliases for zsh
+  lineinfile:
+    dest: "{{ ansible_user_dir }}/.zshrc"
+    line: "ALIAS {{ item }}"
+    create: yes
+  loop:
+    - dog=cat
+    - yolo=sudo
 ```
 
 And add a `roles` section with our newly created role in the playbook. We have to dublicate the `package` task for that, but that is fine:
 
 ```yaml
 # site.yml
+- hosts: all
+  roles:
+    - zsh
+
 ```
 
 Thats it. This was the first refactoring of our playbook.
@@ -589,11 +607,37 @@ Thats it. This was the first refactoring of our playbook.
 Lets continue with `ssh`. The tasks go into `roles/zsh/tasks/main.yml`, the handlers into `roles/zsh/handlers/main.yml`.
 
 ```
-# roles/zsh/tasks/main.yml
+# roles/ssh/tasks/main.yml
+- name: ensure ssh server is installed
+  become: true
+  package:
+    name:  openssh-server
+    state: present
+
+- name: ensure root login is disabled
+  become: yes
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: PermitRootLogin no
+    regexp: "^PermitRootLogin.*$"
+  notify:
+    - restart ssh
+
+- name: ensure ssh service is enabled
+  service:
+    name: sshd
+    enabled: yes
+  notify:
+    - restart ssh
 ```
 
 ```
-# roles/zsh/handlers/main.yml
+# roles/ssh/handlers/main.yml
+- name: restart ssh
+  become: yes
+  service:
+    name: sshd
+    state: restarted
 ```
 
 ```
