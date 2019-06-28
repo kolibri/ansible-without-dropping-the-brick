@@ -1,121 +1,27 @@
-import { Split } from 'mdx-deck/layouts'
-import { CodeSurfer } from "mdx-deck-code-surfer"
+import {
+  CodeSurferLayout,
+  CodeSurferColumnLayout,
+  Code,
+  Step,
+} from "code-surfer"
+
+import Pitfall from '../layouts/Pitfall'
+import Tip from '../layouts/Tip'
 import { Notes } from 'mdx-deck'
-import Pitfall from './layouts/Pitfall'
-import Tip from './layouts/Tip'
-export { components } from "mdx-deck-code-surfer"
-export { swiss as theme } from 'mdx-deck/themes'
+import { Split } from 'mdx-deck/layouts'
+import "prismjs/components/prism-ruby"
+import "prismjs/components/prism-ini"
+import "prismjs/components/prism-yaml"
 
-
-# Ansible without dropping a brick
-
----
-
-# Who is this guy
-
- Lukas Sadzik <lukas.sadzik@sensiolabs.de>  
-Software Developer & Trainer @ SensioLabsDE  
-Automation Fan  
-@ko_libri  
-
-<Notes>
-- who uses vagrant
-- Who already used ansible
-- who has to handle more than two/ten/twenty/hundret machines?
-- Code examples are for demonstration only!
-</Notes>
-
----
-
-# The Problem.
-
-## What we want
-
----
-
-- We need more/less webservers/containers/ec2instances/etc, (scaling)
-- We have to setup ssl/upgrade php/remove ssh access for the po/etc. on some of/all our servers (maintenance)
-- We want to know, what is installed/configured on our machines (documentation)
-- We want to approve every change the trainee makes on our machines (reviewability)
-- We need to discuss the setup or our infrastructure (teamwork and knowledge sharing)
-- We need development vm's for our developers (singe point of truth)
-- And we want it, when we need it (automation)
-
----
-
-# Quick tool overview
-
-
-- [Chef](https://www.chef.io/)
-- [Puppet](https://puppet.com/)
-- [SaltStack](https://www.saltstack.com/)
-- [Ansible](https://www.ansible.com) (this is, what this talk is about)
-
----
-
-# About Ansible
-
-- Open source (GPL) and available on [github](https://github.com/ansible/ansible)
-- Maintained and owned by Redhat
-- written in python
-- configured with YAML files (sorry [Marco](https://twitter.com/Ocramius) ;)
-
----
-
-# How to install ansible
-
-- Via your favourite/available package manager
-
-`(pacman -S)/(apt-get/brew/yum/pip install) ansible`
-
----
-
-export default Pitfall
-
-There are a lot of installation methods mentioned on the installation guide.
-
-Just take the most easiest for you.
-
-Do not install ansible via Git, unless you know, what you are doing
-
----
-
-# How does ansible work
-
----
-
-# The usual setup
-
-- One control machine
-- Some managed machines
-
----
-
-# The control machine
-
-The only machine we interact with directly is the control machine.
-It has ansible installed and our self written scripts checked out.
-
----
-
-# The managed machines
-
-We do not log in onto this machines manualy (in a perfect world, we would not have access to this machines)
-The only need python (=> 2.7) or Python 3 (>= 3.5) installed
-And, our control machine has to be able to connect to the managed machines.
-
----
 
 # Assistested quickstart with Vagrant
 
-
 ---
 
-```ruby
-# ./Vagrantfile
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
+<CodeSurferLayout>
 
+```ruby 5:8
+# Vagrantfile
 Vagrant.configure("2") do |config|
     config.vm.box = "debian/stretch64"
     config.vm.host_name = "ansible-quickstart.foo"
@@ -124,11 +30,13 @@ Vagrant.configure("2") do |config|
         ansible.verbose = true
     end
 end
-----
-8:11
 ```
 
+</CodeSurferLayout>
+
 ---
+
+<CodeSurferLayout>
 
 ```yaml
 # ./playbook.yml
@@ -138,7 +46,11 @@ end
       shell: echo 'Hello World'
 ```
 
+</CodeSurferLayout>
+
 ---
+
+<CodeSurferLayout>
 
 ```bash
 # starting the box (provisioning is only executed when the box is created)
@@ -147,7 +59,10 @@ $ vagrant up
 $ vagrant provision
 ```
 
+</CodeSurferLayout>
+
 ---
+
 
 # First concepts of Ansible
 
@@ -182,7 +97,7 @@ They represent the concrete use of a module.
 
 ---
 
-export default Pitfall
+<Pitfall>
 
 Always name your tasks!  
 Name them unique and meaningfull.
@@ -190,17 +105,20 @@ Name them unique and meaningfull.
 
 This allows you to use the  `--start-at-task` option of `ansible-playbook`
 
+</Pitfall>
 
 ---
 
-export default Tip
+<Tip>
+
 
 Call ansible at least with the first verbosity level (`ansible-playbook -v`).
 
 This will show you details about the executed tasks, that may have useful informations.
 
----
+</Tip>
 
+---
 
 # Writing our first Playbook
 
@@ -208,9 +126,10 @@ Install git and place a config file for the user
 
 ---
 
+<CodeSurferLayout>
 
 ```ini
-#  ./gitconfig.dist
+# ./gitconfig.dist
 [user]
     email = tamara.tester@testingen.foo
     name = Tamara Tester
@@ -219,13 +138,17 @@ Install git and place a config file for the user
     editor = vi
 ```
 
+</CodeSurferLayout>
+
 ---
+
+<CodeSurferLayout>
 
 ```yaml
 # ./playbook.yml 
 - hosts: all
   tasks:
-    - name: ensure git is installed
+    - name: "ensure git is installed"
       become: true
       package:
         name: git
@@ -234,49 +157,71 @@ Install git and place a config file for the user
       copy:
         src: gitconfig.dist
         dest: /home/vagrant/.gitconfig
-----
-*
-2 > address hosts
-4:8 > ensures packages
-9:12 > copy files from control to remote
-5
 ```
+
+```diff 2 subtitle="address hosts"
+```
+
+```diff 4:8 subtitle="ensures packages"
+```
+
+```diff 9:12 subtitle="copy files from control to remote"
+```
+
+```diff 5 subtitle="and what is this?"
+```
+
+</CodeSurferLayout>
 
 ---
 
 # Understanding `become`
 
 ---
-@todo: Add short description about "become"
+
+`become` is the mechanism to run tasks as another user than the current.
+
+In short words, you could say "when I use `sudo` on the shell, I use `become` in ansible"
+
 ---
 
+<CodeSurferLayout>
 
-```yaml
-# become default configuration
+```yaml title="become default configuration"
 become: false
 become_user: root 
 become_method: sudo 
 become_flags: ~
-----
-*
-2 > activates privilege escalation.
-3 > specify user to become
-4 > define method to become user 
-5 > add extra flags
 ```
+
+
+```diff 1 subtitle="activates privilege escalation"
+```
+
+```diff 2 subtitle="specify user to become"
+```
+
+```diff 3 subtitle="define method to become user"
+```
+
+```diff 4 subtitle="add extra flags"
+```
+
+</CodeSurferLayout>
 
 ---
 
-export default Pitfall
-
+<Pitfall>
 
 Setting `become_user`, `become_method` or `become_flags` does NOT imply `become: true`.
 
 This means, you can configure `become_user/method/flags` globally or for a group of tasks and still enable become only for when you need it.
 
+</Pitfall>
+
 ---
 
-export default Pitfall
+<Pitfall>
 
 Ansible does not create a new connection to become another user.
 The user you use for connecting to the remote must be able to perform the `become`.
@@ -284,17 +229,23 @@ The user you use for connecting to the remote must be able to perform the `becom
 Imagine, you ssh into the machine and then call a command with `sudo`.
 This is the same for ansible.
 
+</Pitfall>
+
 ---
 
-export default Tip
+<Tip>
 
 `become` can do more than gaining admin priviliges.
 You can use it, to perform tasks as another user on your system.
 Keep this in mind, when you have to deal with multiple user accounts.
 
+</Tip>
+
 ---
 
-```yaml
+<CodeSurferLayout>
+
+```yaml 9:12 subtitle="Name the source files for dotfiles without the dot"
 # ./playbook.yml 
 - hosts: all
   tasks:
@@ -307,17 +258,9 @@ Keep this in mind, when you have to deal with multiple user accounts.
       copy:
         src: gitconfig.dist
         dest: /home/vagrant/.gitconfig
-----
-9:12
 ```
 
----
-
-export default Tip
-
-Name the source files for dotfiles without the dot.
-
-This makes them more present and every tool can view them without any configuration.
+</CodeSurferLayout>
 
 ---
 
@@ -325,15 +268,20 @@ This makes them more present and every tool can view them without any configurat
 
 ---
 
-```yaml
+<CodeSurferLayout>
+
+```yml 4 subtitle="print out all kown facts"
 # ./site.yml
 - hosts: all
   tasks:
     - debug: var=hostvars
-----
-4 > print out all kown facts
 ```
+
+</CodeSurferLayout>
+
 ---
+
+<CodeSurferLayout>
 
 ```bash
 TASK [debug] ***********************************************
@@ -353,13 +301,16 @@ ok: [default] => {
         }
     }
 }
-----
-*
-6 > We need this
 ```
+
+```diff 6 subtitle="We need this"
+```
+
+</CodeSurferLayout>
 
 ---
 
+<CodeSurferLayout>
 
 ```diff 
  - name: ensure git configs
@@ -367,14 +318,13 @@ ok: [default] => {
      src: gitconfig.dist
 -    dest: /home/vagrant/.gitconfig
 +    dest: "{{ ansible_user_dir }}/.gitconfig"
-----
-*
 ```
+
+</CodeSurferLayout>
 
 ---
 
-
-export default Pitfall
+<Pitfall>
 
 We have to write valid YAML files.
 
@@ -384,13 +334,13 @@ This means, we have to surround Jinja2 statements with quotation marks:
 
 `dest: "{{ my_fact }}/foo"`  will do the job.
 
+</Pitfall>
+
 ---
 
+<CodeSurferLayout>
 
-# Facts are global per run
-
-
-```yaml
+```yaml title="Facts are global per run"
 - hosts: all
   vars:
     my_var: foobar
@@ -400,11 +350,15 @@ This means, we have to surround Jinja2 statements with quotation marks:
 - hosts: all
   tasks:
     - debug: var=my_var
-----
-*
-1:5 > { "my_var": "foobar" }
-6:9 > { "my_var": "VARIABLE IS NOT DEFINED!" }
 ```
+
+```diff 1:5 title="Facts are global per run" subtitle='{ "my_var": "foobar" }'
+```
+
+```diff 6:9 title="Facts are global per run" subtitle='{ "my_var": "VARIABLE IS NOT DEFINED!" }'
+```
+
+</CodeSurferLayout>
 
 ---
 
@@ -412,6 +366,7 @@ This means, we have to surround Jinja2 statements with quotation marks:
 
 ---
 
+<CodeSurferLayout>
 
 ```yaml
 # site.yml
@@ -424,13 +379,19 @@ This means, we have to surround Jinja2 statements with quotation marks:
       template:
         src: gitconfig.j2
         dest: "{{ ansible_user_dir }}/.gitconfig"
-----
-*
-3:5 > define variable inside playbook
-7:10 > ensure parsed template on remote
 ```
 
+```diff 3:5 subtitle="define variable inside playbook"
+```
+
+```diff 7:10 subtitle="ensure parsed template on remote"
+```
+
+</CodeSurferLayout>
+
 ---
+
+<CodeSurferLayout>
 
 ```ini
 # gitconfig.j2
@@ -440,21 +401,27 @@ This means, we have to surround Jinja2 statements with quotation marks:
 [core]
     excludesfile = {{ ansible_user_dir }}/.gitignore
     editor = nano
-----
-*
-3,4 > variable from playbook
-6 > variable from facts
 ```
+
+```diff 3[13:33],4[12:32] subtitle="variable from playbook"
+```
+
+```diff 6[20:41] subtitle="variable from facts"
+```
+
+</CodeSurferLayout>
 
 ---
 
-export default Tip
+<Tip>
 
 Always add the `.j2` file extension to your templates.
 
 Also add the ending fo the target file format, if there is one.
 
 Example: `vhost.conf.j2`. With this, you can easily spot, that this file is a template and the rendered result will be a `*.conf` file.
+
+</Tip>
 
 ---
 
@@ -468,6 +435,8 @@ Example: `vhost.conf.j2`. With this, you can easily spot, that this file is a te
 Install zsh and place some aliases
 
 ---
+
+<CodeSurferLayout>
 
 ```yaml
 - hosts: all
@@ -488,13 +457,19 @@ Install zsh and place some aliases
       loop:
         - "dog=cat"
         - "yolo=sudo"
-----
-*
-6:8 > inline style for package related modules
-15:18 > regular style with loop/item
 ```
 
+```diff 6:8 subtitle="inline style for package related modules"
+```
+
+```diff 15:18 subtitle="regular style with loop/item"
+```
+
+</CodeSurferLayout>
+
 ---
+
+<CodeSurferLayout>
 
 ```bash
 # ~/.zshrc 
@@ -502,12 +477,15 @@ alias dog=cat
 alias yolo=sudo
 ```
 
+</CodeSurferLayout>
+
 ---
 
 # @todo: Maybe add section about `loop_control`
 
 ---
 
+<CodeSurferLayout>
 
 ```yaml
 - name: ensure git config
@@ -520,12 +498,18 @@ alias yolo=sudo
     - { ns: user, name: email,   value: "{{ git_user_mail }}" }
     - { ns: user, name: name,    value: "{{ git_user_name }}" }
     - { ns: push, name: default, value: simple }
-    - { 
-        ns: core,
-        name: excludesfile, 
-        value: "{{ ansible_user_dir }}/.gitignore" 
-      }
 ```
+
+```diff 4[18:24],8[9:16],9[9:16],10[9:16]
+```
+
+```diff 5[17:25],8[19:29],9[19:28],10[19:31]
+```
+
+```diff 6[16:25],8[34:61],9[34:61],10[34:46]
+```
+
+</CodeSurferLayout>
 
 ---
 
@@ -540,6 +524,8 @@ Executing tasks at the end of play, if we need it.
 @todo Add slides about tasks return stuff
 
 ---
+
+<CodeSurferLayout>
 
 ```yaml
 # site.yml
@@ -557,8 +543,6 @@ Executing tasks at the end of play, if we need it.
       service:
         name: sshd
         enabled: yes
-      notify:
-        - restart ssh
 
   handlers:
     - name: restart ssh
@@ -566,100 +550,48 @@ Executing tasks at the end of play, if we need it.
       service:
         name: sshd
         state: restarted
-----
-*
-4:11 > Disable root login in ssh config file
-12:17 > enable the ssh service on startup
-19 > Start handlers section (same indention level as "tasks")
-20:24 > restart ssh service
-11, 17, 20 > notify the task inside handlers
 ```
+
+```diff 4:9 subtitle="Disable root login in ssh config file"
+```
+
+```diff 12:15 subtitle="enable the ssh service on startup"
+```
+
+```diff 17 subtitle="Start handlers section (same indention level as 'tasks')"
+```
+
+```diff 18:22 subtitle="restart ssh service"
+```
+
+```diff 10:11,18 subtitle="notify the task inside handlers"
+```
+
+```diff 11[11:21],18[13:23] subtitle="Must match"
+```
+
+</CodeSurferLayout>
 
 ---
 
-export default Tip
+<Tip>
 
 Handlers are just tasks. You can use the same modules here.
 
+</Tip>
+
 ---
 
-export default Pitfall
+<Pitfall>
 
 Do not start or restart your services at task level. Just enable them with the `service` module and add a notify to the restarting handler.
 
+</Pitfall>
+
 ---
 
-export default Pitfall
+<Pitfall>
 
 Handlers are only executed, when at least one of the notifying tasks get the `changed` state during the playbook run.
 
----
-
-# Roles
-
-Make things reusable
-
----
-
-```bash
-$ ansible-galaxy init --init-path=roles zsh
-- zsh was created successfully
-$ tree
-.
-├── roles
-│   └── zsh
-│       ├── defaults
-│       │   └── main.yml
-│       ├── files
-│       ├── handlers
-│       │   └── main.yml
-│       ├── meta
-│       │   └── main.yml
-│       ├── README.md
-│       ├── tasks
-│       │   └── main.yml
-│       ├── templates
-│       ├── tests
-│       │   ├── inventory
-│       │   └── test.yml
-│       └── vars
-│           └── main.yml
-└── site.yml
-```
-
----
-
-
-```bash
-.
-├── roles
-│   └── zsh
-│       └── tasks
-│           └── main.yml
-└── site.yml
-```
-
----
-
----
-
-export default Split
-
-```bash
-.
-├── roles
-│   └── zsh
-│       └── tasks
-│           └── main.yml
-└── site.yml
-```
-
-```bash
-.
-├── roles
-│   └── zsh
-│       └── tasks
-│           └── main.yml
-└── site.yml
-```
-
+</Pitfall>

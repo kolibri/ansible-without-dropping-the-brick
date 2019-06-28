@@ -1,0 +1,608 @@
+import {
+  CodeSurferLayout,
+  CodeSurferColumnLayout,
+  Code,
+  Step,
+} from "code-surfer"
+
+import Pitfall from '../layouts/Pitfall'
+import Tip from '../layouts/Tip'
+import { Notes } from 'mdx-deck'
+import { Split } from 'mdx-deck/layouts'
+import "prismjs/components/prism-ruby"
+import "prismjs/components/prism-ini"
+import "prismjs/components/prism-yaml"
+
+
+# Roles
+
+Make things reusable
+
+---
+
+<CodeSurferLayout>
+
+```bash
+$ ansible-galaxy init --init-path=roles zsh
+- zsh was created successfully
+```
+
+```bash
+$ ansible-galaxy init --init-path=roles zsh
+- zsh was created successfully
+$ tree
+.
+├── roles
+│   └── zsh
+│       ├── defaults
+│       │   └── main.yml
+│       ├── files
+│       ├── handlers
+│       │   └── main.yml
+│       ├── meta
+│       │   └── main.yml
+│       ├── README.md
+│       ├── handlers
+│       │   └── main.yml
+│       ├── tasks
+│       │   └── main.yml
+│       ├── templates
+│       ├── tests
+│       │   ├── inventory
+│       │   └── test.yml
+│       └── vars
+│           └── main.yml
+└── site.yml
+```
+
+</CodeSurferLayout>
+
+---
+
+<CodeSurferLayout>
+
+```bash
+.
+├── roles
+│   └── zsh
+│       └── tasks
+│           └── main.yml
+└── site.yml
+```
+
+</CodeSurferLayout>
+
+---
+
+<CodeSurferColumnLayout sizes={[1, 1]}>
+
+<Step title="Create zsh role">
+
+```yaml 7:10,13:14,15:24
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+          - zsh
+        state: present
+
+    - name: ensure aliases for zsh
+      lineinfile:
+        dest: "{{ ansible_user_dir }}/.zshrc"
+        line: "ALIAS {{ item }}"
+        create: yes
+      loop:
+        - dog=cat
+        - yolo=sudo
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - { ns: user, name: email, value: "{{ git_user_email }}" }
+        - { ns: user, name: name, value: "{{ git_user_name }}" }
+        - { ns: push, name: default, value: simple }
+        - {
+            ns: core,
+            name: excludesfile,
+            value: "{{ ansible_user_dir }}/.gitignore",
+          }
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml
+```
+</Step>
+
+<Step title="Create zsh role">
+
+```yaml 6:7
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  roles:
+    - zsh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - { ns: user, name: email, value: "{{ git_user_email }}" }
+        - { ns: user, name: name, value: "{{ git_user_name }}" }
+        - { ns: push, name: default, value: simple }
+        - {
+            ns: core,
+            name: excludesfile,
+            value: "{{ ansible_user_dir }}/.gitignore",
+          }
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml
+# roles/zsh/tasks/main.yml
+- name: ensure git is installed
+  become: true
+  package:
+    name: zsh
+    state: present
+
+- name: ensure aliases for zsh
+  lineinfile:
+    dest: "{{ ansible_user_dir }}/.zshrc"
+    line: "ALIAS {{ item }}"
+    create: yes
+  loop:
+    - dog=cat
+    - yolo=sudo
+```
+
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 1, 1]}>
+
+<Step title="Create ssh role">
+
+```yaml 33:58
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  roles:
+    - zsh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - { ns: user, name: email, value: "{{ git_user_email }}" }
+        - { ns: user, name: name, value: "{{ git_user_name }}" }
+        - { ns: push, name: default, value: simple }
+        - {
+            ns: core,
+            name: excludesfile,
+            value: "{{ ansible_user_dir }}/.gitignore",
+          }
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml
+```
+
+```yaml
+```
+
+</Step>
+
+<Step title="Create ssh role">
+
+
+```yaml 8
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  roles:
+    - zsh
+    - ssh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - { ns: user, name: email, value: "{{ git_user_email }}" }
+        - { ns: user, name: name, value: "{{ git_user_name }}" }
+        - { ns: push, name: default, value: simple }
+        - {
+            ns: core,
+            name: excludesfile,
+            value: "{{ ansible_user_dir }}/.gitignore",
+          }
+```
+
+```yaml
+# roles/ssh/tasks/main.yml
+- name: ensure root login is disabled
+  become: yes
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: PermitRootLogin no
+    regexp: "^PermitRootLogin.*$"
+  notify:
+    - restart ssh
+
+- name: ensure ssh service is enabled
+  service:
+    name: sshd
+    enabled: yes
+  notify:
+    - restart ssh
+```
+
+```yaml
+# roles/ssh/handlers/main.yml
+- name: restart ssh
+  become: yes
+  service:
+    name: sshd
+    state: restarted
+```
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 1, 1]}>
+
+<Step title="Create git role">
+
+```
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: tamara.tester@testingen.de
+    git_user_name: Tamara Tester
+  roles:
+    - zsh
+    - ssh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - { ns: user, name: email, value: "{{ git_user_email }}" }
+        - { ns: user, name: name, value: "{{ git_user_name }}" }
+        - { ns: push, name: default, value: simple }
+        - {
+            ns: core,
+            name: excludesfile,
+            value: "{{ ansible_user_dir }}/.gitignore",
+          }
+```
+
+```yaml
+```
+
+```yaml
+```
+
+</Step>
+
+<Step title="Create git role">
+
+```yaml
+# site.yml
+- hosts: all
+  roles:
+    - zsh
+    - ssh
+    - git
+```
+
+```yaml
+# roles/git/tasks/main.yml
+- name: ensure git is installed
+  become: true
+  package:
+    name:
+      - git
+    state: present
+
+- name: ensure git config
+  ini_file:
+    dest: "{{ ansible_user_dir }}/.gitconfig"
+    section: "{{ item.ns }}"
+    option: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - { ns: user, name: email, value: "{{ git_user_email }}" }
+    - { ns: user, name: name, value: "{{ git_user_name }}" }
+    - { ns: push, name: default, value: simple }
+    - {
+        ns: core,
+        name: excludesfile,
+        value: "{{ ansible_user_dir }}/.gitignore",
+      }
+```
+
+```yaml
+# roles/git/defaults/main.yml
+git_user_email: tamara.tester@testingen.de
+git_user_name: Tamara Tester
+```
+
+
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+---
+
+# `defaults` vs `vars`
+
+---
+
+# `defaults`
+
+- "Public" configuration
+- Can be overwritten
+- Should provide "good" default values
+
+---
+
+# `vars`
+
+- "Private" configuration
+- for variables based on facts
+- use them together with `include_vars`
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 3, 2]}>
+
+<Step>
+
+```
+$ tree
+.
+├── roles
+│   └── ssh
+│       ├── handlers
+│       │   └── main.yml
+│       ├── tasks
+│       │   └── main.yml
+│       └── vars
+│           ├── Archlinux.yml
+│           ├── Debian.yml
+│           └── Ubuntu.yml
+└── site.yml
+```
+
+```yaml
+---
+# roles/ssh/tasks/main.yml
+- name: include os-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: install ssh package
+  package: 
+    name: {{ ssh_package }}
+    state: present
+
+---
+# roles/ssh/tasks/handlers.yml
+- name: restart ssh service
+  service: 
+    name: {{ ssh_service }}
+    state: restarted
+```
+
+```yaml
+---
+# roles/ssh/vars/Archlinux.yml
+ssh_package: ssh
+ssh_service: sshd
+
+---
+# roles/ssh/vars/Debian.yml
+ssh_package: openssh-server
+ssh_service: sshd
+
+---
+# roles/ssh/vars/Ubuntu.yml
+ssh_package: openssh-server
+ssh_service: ssh
+```
+
+</Step>
+
+<Step>
+
+```diff 10[17:25],11[17:22],12[17:22]
+```
+
+```diff 4
+```
+
+```diff 2,7,12
+```
+
+</Step>
+
+<Step>
+
+```diff 99
+```
+
+```diff 8[11:27],15[11:27]
+```
+
+```diff 3[1:11],4[1:11],8[1:11],9[1:11],13[1:11],14[1:11]
+```
+
+</Step>
+
+
+</CodeSurferColumnLayout>
+
+---
+
+# Role meta
+
+As everything is some kind of global during a play, you can (and may) use variables, handlers and so from other roles.
+Saying this, we now have roles, that depend on each other.
+
+---
+
+<CodeSurferLayout>
+
+# Role meta
+
+```yaml
+# roles/webserver/meta/main.yml
+---
+dependencies:
+  - { role: ssh }
+  - role: git
+    vars:
+      git_user_email: torben.tester@testingen.de
+      git_user_name: Torben Tester
+```
+
+```diff 4 subtitle="Simple dependency"
+```
+
+```diff 5:8 subtitle="Depend on role with this vars"
+```
+
+</CodeSurferLayout>
