@@ -63,12 +63,15 @@ database.foo  git_user_email=torben@testingen.foo
 ```ini subtitle="Set vars for groups"
 # inventory/hosts
 [webserver]
-frontend.foo  ansible_host=192.168.12.34
+frontend.foo ansible_host=192.168.12.34
 backend.foo
 [webserver:vars]
 ansible_connection=ssh
+
 [database]
-database.foo  git_user_email=torben@testingen.foo
+database.foo
+[database:vars]
+git_user_email=torben@testingen.foo
 ```
 
 </CodeSurferLayout>
@@ -106,7 +109,7 @@ odbm.foo
 search.foo
 
 [database:vars]
-ansible_user=damiantaster
+ansible_user=damiandatabase
 ```
 
 ```diff 10:17 subtitle="Assign with hostname and set group vars"
@@ -119,80 +122,101 @@ ansible_user=damiantaster
 
 ---
 
-# Layers of configuration
-
-- by Application
-- by Development Stage
-- by geographical Region
-- by Security Zone
-- ...
+# Define variables for hosts and groups
 
 ---
 
-<Image src='./images/inventory_groups.svg' size='100% 100%'>
-</Image>
-
----
-
-# Create Inventory files per stage
-
----
-
-<CodeSurferLayout>
-
-```ini 
-# inventory/prod
-frontend[01:02].prod
-backend01.prod
-database01.prod
-```
-
-```ini
-# inventory/prod
-[frontend]
-frontend[01:02].prod
-[backend]
-backend01.prod
-[database]
-database01.prod
-```
-
-</CodeSurferLayout>
-
----
-
-<CodeSurferColumnLayout  sizes={[1, 1, 1]}>
+<CodeSurferColumnLayout  sizes={[1, 1]}>
 
 <Step>
 
-```ini
-# inventory/stage
-[frontend]
-frontend[01:02].stage
-[backend]
-backend01.stage
-[database]
-database01.stage
+```bash 2[4:20],3[4:20],4[4:20]
+.
+├── development
+├── production
+├── staging
+├── group_vars
+│   ├── all.yml
+│   ├── database.yml
+│   └── webserver.yml
+└── host_vars/
+    ├── backend.foo.dev
+    ├── database.foo.dev
+    └── frontend.foo.dev
 ```
 
 ```ini
-# inventory/test
-[frontend]
-frontend01.test
-[backend]
-backend01.test
+# development
+[webserver]
+frontend.foo ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+
 [database]
-database01.test
+database.foo
 ```
 
-```ini
-# inventory/dev
-[frontend]
-local.dev
-[backend]
-local.dev
+</Step>
+
+<Step>
+
+```bash 5[4:20],7[8:20],8[8:20]
+.
+├── development
+├── production
+├── staging
+├── group_vars
+│   ├── all.yml
+│   ├── database.yml
+│   └── webserver.yml
+└── host_vars/
+    ├── backend.foo.dev
+    ├── database.foo.dev
+    └── frontend.foo.dev
+```
+
+```ini 2,8
+# development
+[webserver]
+frontend.foo ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+
 [database]
-local.dev
+database.foo
+```
+
+</Step>
+
+<Step>
+
+```bash 9[4:20],10[8:20],11[8:20],12[8:20]
+.
+├── development
+├── production
+├── staging
+├── group_vars
+│   ├── all.yml
+│   ├── database.yml
+│   └── webserver.yml
+└── host_vars/
+    ├── backend.foo.dev
+    ├── database.foo.dev
+    └── frontend.foo.dev
+```
+
+```ini 3[1:12],4[1:11],9[1:12]
+# development
+[webserver]
+frontend.foo ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+
+[database]
+database.foo
 ```
 
 </Step>
@@ -201,3 +225,177 @@ local.dev
 </CodeSurferColumnLayout>
 
 ---
+
+
+<CodeSurferLayout>
+
+```yaml
+# group_vars/all.yml
+---
+git_user_email: tamara.tester@testingen.foo
+git_user_name: Tamara Tester
+```
+
+</CodeSurferLayout>
+
+---
+
+<Tip>
+
+Place connection variables in inventory
+
+Everything else in ` group_vars`/`host_vars/`.
+</Tip>
+
+---
+
+
+<Tip>
+
+Try to avoid ` host_vars/`.
+
+Thinking in groups will be more scalable and tends to be more organized
+
+</Tip>
+
+---
+
+# How to scale inventory
+
+---
+
+
+# Find Layers of configuration
+
+- by application
+- by deployment stage
+- by geographical region
+- by security zone
+- by hardware specifications
+- ...
+
+---
+
+# Application & Deployment Stage
+
+<Image src='./images/inventory_groups.svg' size='50% 50%'>
+</Image>
+
+---
+
+
+# Different kinds of inventory organization
+
+
+---
+
+
+<CodeSurferLayout>
+
+```bash
+.
+├── development
+├── production
+├── staging
+├── group_vars
+│   ├── all.yml
+│   ├── database.yml
+│   └── webserver.yml
+└── host_vars/
+ ```
+
+```diff 2[4:20],3[4:20],4[4:20] title="deployment environments"
+```
+
+```diff 5[4:20],7[8:20],8[8:20] title="application"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+
+
+<CodeSurferLayout>
+
+```bash
+.
+└── inventories
+    ├── development
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   └── inventory
+    ├── production
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   └── inventory
+    └── staging
+        ├── group_vars
+        │   ├── all.yml
+        │   ├── database.yml
+        │   └── frontend.yml
+        ├── host_vars/
+        └── inventory
+```
+
+```diff 3[8:40],10[8:40],17[8:40] title="deployment environments"
+```
+
+```diff 6[16:40],7[16:40],13[16:40],14[16:40],20[16:40],21[16:40] title="application"
+```
+
+</CodeSurferLayout>
+
+---
+
+<CodeSurferLayout>
+
+```bash
+.
+└── inventories
+    ├── shop
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   ├── development
+    │   ├── staging
+    │   └── production
+    ├── website
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   ├── development
+    │   ├── staging
+    │   └── production
+    └── blog
+        ├── group_vars
+        │   ├── all.yml
+        │   ├── database.yml
+        │   └── frontend.yml
+        ├── host_vars/
+        ├── development
+        ├── staging
+        └── production
+```
+
+```diff 3[8:40],12[8:40],21[8:40] title="projects"
+```
+
+```diff 9[12:40],10[12:40],11[12:40] title="deployment environments"
+```
+
+```diff 6[16:40],7[16:40] title="application services"
+```
+
+</CodeSurferLayout>
