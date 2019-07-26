@@ -575,34 +575,3 @@ ssh_service: ssh
 
 </CodeSurferColumnLayout>
 
----
-
-# Role meta
-
-As everything is some kind of global during a play, you can (and may) use variables, handlers and so from other roles.
-Saying this, we now have roles, that depend on each other.
-
----
-
-<CodeSurferLayout>
-
-# Role meta
-
-```yaml
-# roles/webserver/meta/main.yml
----
-dependencies:
-  - { role: ssh }
-  - role: git
-    vars:
-      git_user_email: torben.tester@testingen.de
-      git_user_name: Torben Tester
-```
-
-```diff 4 subtitle="Simple dependency"
-```
-
-```diff 5:8 subtitle="Depend on role with this vars"
-```
-
-</CodeSurferLayout>

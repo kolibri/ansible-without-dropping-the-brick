@@ -1,0 +1,130 @@
+import {
+  CodeSurferLayout,
+  CodeSurferColumnLayout,
+  Code,
+  Step,
+} from "code-surfer"
+
+import { Image } from '@mdx-deck/components'
+
+import Pitfall from '../layouts/Pitfall'
+import Tip from '../layouts/Tip'
+import { Notes } from 'mdx-deck'
+import { Split } from 'mdx-deck/layouts'
+import "prismjs/components/prism-ruby"
+import "prismjs/components/prism-ini"
+import "prismjs/components/prism-yaml"
+
+
+# More on playbooks
+
+---
+
+<CodeSurferLayout>
+
+```bash title="It is common, to have several playbooks"
+.
+├── roles/
+├── playbooks/
+│   ├── database.yml
+│   └── application.yml
+└── site.yml
+```
+
+</CodeSurferLayout>
+
+---
+
+<CodeSurferLayout>
+
+
+```yaml title="... and one, that includes all the others ..."
+# site.yml
+---
+- import_playbook: playbooks/database.yml
+- import_playbook: playbooks/application.yml
+
+```
+
+```yaml title="... and performs global tasks" subtitle="checking for python to execute ansible"
+---
+- hosts: all
+  gather_facts: false
+  tags: [always]
+  pre_tasks:
+    - name: ensure python
+      raw: sudo bash -c "test -e /usr/bin/python || (pacman -S --noconfirm python)"
+
+- import_playbook: playbooks/database.yml
+- import_playbook: playbooks/application.yml
+
+```
+
+</CodeSurferLayout>
+
+---
+
+# Adding hosts
+
+---
+
+<CodeSurferLayout>
+
+
+```yaml
+# site.yml
+- hosts: localhost
+  tasks:
+    - name: Add a new host
+      add_host:
+        hostname: '{{ new_ip }}'
+        groups: [test-vm]
+        ansible_ssh_host: test-vm.foo
+        doc_root: /var/www/project
+
+- hosts: test-vm
+  roles:
+    - webserver
+```
+
+```diff 5:9 subtitle="Could be a vm, clound instance, etc. created before in the run."
+```
+
+```diff 11:13 subtitle="Complete new run (in the same playbook file)"
+```
+
+```diff 7,11 subtitle="Assigned by group name"
+```
+
+
+```yaml title="And as a bonus, we wait for the host to become available"
+# site.yml
+- hosts: localhost
+  tasks:
+    - name: Add a new host
+      add_host:
+        hostname: '{{ new_ip }}'
+        groups: [test-vm]
+        ansible_ssh_host: test-vm.foo
+        doc_root: /var/www/project
+    - name: Wait for new host
+      wait_for:
+        host: "{{ new_ip }}"
+        port: 22
+        delay: 10
+
+- hosts: test-vm
+  roles:
+    - webserver
+```
+
+</CodeSurferLayout>
+
+---
+
+# Supported Cloud Services
+
+Alicloud, Group, Amazon, Atomic, Azure, Centurylink, Cloudscale, Cloudstack, Digital_Ocean, Dimensiondata, Docker, Google, Hcloud, Heroku, Huawei, Kubevirt, Linode, Lxc, Lxd, Memset, Misc, Oneandone, Online, Opennebula, Openstack, Oracle, Ovh, Ovirt, Packet, Podman, Profitbricks, Pubnub, Rackspace, Scaleway, Smartos, Softlayer, Spotinst, Univention, Vmware, Vultr, Webfaction, Xenserver
+
+---
+
