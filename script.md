@@ -700,7 +700,7 @@ When stage is the same as production, test can work with only one frontend insta
 | ----- | --------------------------------- | --------------- | ---------------- |
 | prod  | frontend01.prod frontend02.prod   | backend01.prod  | database01.prod  |
 | stage | frontend01.stage frontend02.stage | backend01.stage | database01.stage |
-| test  | frontend01.prod                   | backend01.stage | database01.test  |
+| test  | frontend01.test                   | backend01.test  | database01.test  |
 | dev   | local.dev                         | local.dev       | local.dev        |
 
 And we got a table of hostnames.
@@ -720,12 +720,8 @@ database01.prod
 
 ```ini
 # inventory/test
-[frontend]
-frontend01.prod
-[backend]
-backend01.prod
-[database]
-database01.prod
+
+
 ```
 
 ```ini

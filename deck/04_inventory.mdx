@@ -5,6 +5,8 @@ import {
   Step,
 } from "code-surfer"
 
+import { Image } from '@mdx-deck/components'
+
 import Pitfall from '../layouts/Pitfall'
 import Tip from '../layouts/Tip'
 import { Notes } from 'mdx-deck'
@@ -15,5 +17,187 @@ import "prismjs/components/prism-yaml"
 
 
 # The Inventory
+
+## The place to define our target machines
+
+
+---
+
+<CodeSurferLayout>
+
+```ini
+# inventory/hosts
+frontend.foo
+backend.foo
+database.foo
+```
+
+</CodeSurferLayout>
+
+---
+
+<CodeSurferLayout>
+
+```ini subtitle="Add configs"
+# inventory/hosts
+frontend.foo  ansible_host=192.168.12.34 ansible_connection=ssh
+backend.foo   ansible_connection=ssh
+database.foo  git_user_email=torben@testingen.foo
+```
+
+```diff 2:3 subtitle="Connection configs"
+```
+
+```diff 4 subtitle="Directly set fact variables"
+```
+
+```ini subtitle="Group hosts"
+# inventory/hosts
+[webserver]
+frontend.foo  ansible_host=192.168.12.34 ansible_connection=ssh
+backend.foo   ansible_connection=ssh
+[database]
+database.foo  git_user_email=torben@testingen.foo
+```
+
+```ini subtitle="Set vars for groups"
+# inventory/hosts
+[webserver]
+frontend.foo  ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+[database]
+database.foo  git_user_email=torben@testingen.foo
+```
+
+</CodeSurferLayout>
+
+---
+
+<CodeSurferLayout>
+
+```ini 2:8 subtitle="Define host with host specific variables"
+# inventory/hosts
+shop.foo    ansible_host=192.168.12.34
+pim.foo     ansible_host=192.168.12.35
+cms.foo     ansible_host=192.168.12.36
+blog.foo    ansible_host=192.168.12.37
+rdbm.foo    ansible_host=192.168.12.38
+odbm.foo    ansible_host=192.168.12.39
+search.foo  ansible_host=192.168.12.40
+
+[php]
+shop.foo
+pim.foo
+cms.foo
+blog.foo
+
+[php:vars]
+php_version=7.2
+
+[symfony]
+cms.foo
+shop.foo
+
+[database]
+rdbm.foo
+odbm.foo
+search.foo
+
+[database:vars]
+ansible_user=damiantaster
+```
+
+```diff 10:17 subtitle="Assign with hostname and set group vars"
+```
+
+```diff 1:30
+```
+
+</CodeSurferLayout>
+
+---
+
+# Layers of configuration
+
+- by Application
+- by Development Stage
+- by geographical Region
+- by Security Zone
+- ...
+
+---
+
+<Image src='./images/inventory_groups.svg' size='100% 100%'>
+</Image>
+
+---
+
+# Create Inventory files per stage
+
+---
+
+<CodeSurferLayout>
+
+```ini 
+# inventory/prod
+frontend[01:02].prod
+backend01.prod
+database01.prod
+```
+
+```ini
+# inventory/prod
+[frontend]
+frontend[01:02].prod
+[backend]
+backend01.prod
+[database]
+database01.prod
+```
+
+</CodeSurferLayout>
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 1, 1]}>
+
+<Step>
+
+```ini
+# inventory/stage
+[frontend]
+frontend[01:02].stage
+[backend]
+backend01.stage
+[database]
+database01.stage
+```
+
+```ini
+# inventory/test
+[frontend]
+frontend01.test
+[backend]
+backend01.test
+[database]
+database01.test
+```
+
+```ini
+# inventory/dev
+[frontend]
+local.dev
+[backend]
+local.dev
+[database]
+local.dev
+```
+
+</Step>
+
+
+</CodeSurferColumnLayout>
 
 ---
