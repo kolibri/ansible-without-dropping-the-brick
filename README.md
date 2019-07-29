@@ -12,7 +12,7 @@ $ npm run start
 $ npm run build
 ```
 
-Or, on a system, that does not fuck op nodejs stuff (aka not macOs):
+Or, on a system, that does not fuck up nodejs stuff (aka not macOS):
 
 ```bash
 # start the slides
