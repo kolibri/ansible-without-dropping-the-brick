@@ -1,0 +1,47 @@
+<CodeSurferLayout>
+
+```yaml title="Our first playbook"
+# ./playbook.yml 
+- hosts: all
+  tasks:
+    - name: "ensure git is installed"
+      become: true
+      package:
+        name: git
+        state: present
+    - name: ensure git configs
+      copy:
+        src: gitconfig.dist
+        dest: /home/vagrant/.gitconfig
+```
+
+```diff 2 subtitle="address hosts"
+```
+
+```diff 4:8 subtitle="ensures packages"
+```
+
+```diff 9:12 subtitle="copy files from control to remote"
+```
+
+```diff 5 subtitle="and what is this?"
+```
+
+</CodeSurferLayout>
+
+
+<Notes>
+
+Und dies unser erstes Playbook
+
+Zuerst müssen wir sagen, welche Zielsysteme wir ansprechen wollen
+
+Unter `tasks` können wir dann unsere tasks platzieren.
+
+Wie hier das das `package` Modul, welches sich je nach Betriebssystem versucht denn entsprechenden Packetmanager zu nehmen um die angegebenen Pakete zu installieren.
+
+Unn mit dem Copy-Modul kopieren wir Dateien vom Kontrol- zum Zielsystem.
+
+Soweit so klar, bleibt nur noch das hier: 
+
+</Notes> 

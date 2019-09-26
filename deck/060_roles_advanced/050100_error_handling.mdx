@@ -1,0 +1,22 @@
+<CodeSurferLayout>
+
+```yaml title="React to errors"
+- name: update pacman
+  pacman: 
+    update_cache: yes
+    upgrade: yes
+  register: pacman_update_result
+  ignore_errors: True
+
+- name: repair broken pacman
+  include: repair_pacman.yml
+  when: pacman_update_result is failed
+```
+
+```diff 6 subtitle="we don't care for this one"
+```
+
+```diff 5,10 subtitle="save and check for result"
+```
+
+</CodeSurferLayout>

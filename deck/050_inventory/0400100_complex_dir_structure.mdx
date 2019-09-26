@@ -1,0 +1,35 @@
+<CodeSurferLayout>
+
+```bash title="multiple inventory dirs"
+.
+└── inventories
+    ├── development
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   └── inventory
+    ├── production
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   └── inventory
+    └── staging
+        ├── group_vars
+        │   ├── all.yml
+        │   ├── database.yml
+        │   └── frontend.yml
+        ├── host_vars/
+        └── inventory
+```
+
+```diff 3[8:40],10[8:40],17[8:40] subtitle="deployment environment"
+```
+
+```diff 6[16:40],7[16:40],13[16:40],14[16:40],20[16:40],21[16:40] subtitle="services"
+```
+
+</CodeSurferLayout>

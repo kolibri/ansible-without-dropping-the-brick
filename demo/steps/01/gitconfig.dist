@@ -1,0 +1,6 @@
+[user]
+    email = lukas.sadzik@sensiolabs.de
+    name = Lukas Sadzik
+[core]
+    excludesfile = /home/vagrant/.gitignore
+    editor = nano

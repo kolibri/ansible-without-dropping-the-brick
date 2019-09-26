@@ -1,0 +1,63 @@
+<CodeSurferColumnLayout  sizes={[1, 1]}>
+
+<Step title="Variable-files for our inventory">
+
+```bash
+.
+├── hosts
+├── group_vars
+│   ├── all.yml
+│   ├── database.yml
+│   └── webserver.yml
+└── host_vars/
+    ├── backend.foo.yml
+    ├── database.foo.yml
+    └── frontend.foo.yml
+```
+
+```ini
+# development
+[webserver]
+frontend.foo ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+
+[database]
+database.foo
+```
+
+</Step>
+
+<Step subtitle="Configure specific hosts">
+
+```diff 7[4:20],8[8:20],9[8:20],10[8:20]
+```
+
+```diff 3[1:12],4[1:11],9[1:12]
+```
+
+</Step>
+
+
+<Step subtitle="grouped based config to ./group_vars">
+
+```diff 3[4:40],5[8:40],6[8:40]
+```
+
+```diff 2,8
+```
+
+</Step>
+
+<Step subtitle="the host_vars and group_vars directory needs to be in the same directory as the inventory file">
+
+```diff 3[4:40],7[4:20],2[4:40]
+```
+
+```ini
+```
+
+</Step>
+
+</CodeSurferColumnLayout>

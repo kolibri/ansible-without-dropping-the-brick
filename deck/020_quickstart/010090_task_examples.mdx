@@ -1,0 +1,21 @@
+#### Task examples
+
+- Ensure that file `$xxy` exists with this content (`template`, `copy`)
+- Ensure service `$abc` is running (`service`)
+- Ensure user `foobar` exists and has no sudo privileges (`user`)
+- Deploy `$app` to prod (`deploy_helper`)
+- Run script `take_world_leadership.sh` (`shell`, `command`)
+
+<Notes>
+
+Das Ziel eines Tasks ist es, einnen bestimmten Zustand sicher zu stellen.
+
+Ist der Zustand nicht vorhanden, versucht der Task, diese umzusetzen. Ansonste macht der Tasks einfach nichts.
+
+Weitere Beispiele:
+
+- ensure directory (file)
+- ensure git repo checked out at $ (git)
+- boot this ec2 instance (ec2)
+
+</Notes>

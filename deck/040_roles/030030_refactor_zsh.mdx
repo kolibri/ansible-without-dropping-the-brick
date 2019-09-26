@@ -1,0 +1,170 @@
+<CodeSurferColumnLayout sizes={[1, 1]}>
+
+<Step title="Create zsh role">
+
+```yaml 1,7:10,13:14,15:24 
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  tasks:
+    - name: ensure packages are installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+          - zsh
+        state: present
+
+    - name: ensure aliases for zsh
+      lineinfile:
+        dest: "{{ ansible_user_dir }}/.zshrc"
+        line: "ALIAS {{ item }}"
+        create: yes
+      loop:
+        - dog=cat
+        - yolo=sudo
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml
+```
+</Step>
+
+<Step subtitle="from playbook to roles tasks file">
+
+```yaml 6:7
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  roles:
+    - zsh
+  tasks:
+    - name: ensure packages are installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml 1
+# roles/zsh/tasks/main.yml
+- name: ensure zsh is installed
+  become: true
+  package:
+    name: zsh
+    state: present
+
+- name: ensure aliases for zsh
+  lineinfile:
+    dest: "{{ ansible_user_dir }}/.zshrc"
+    line: "ALIAS {{ item }}"
+    create: yes
+  loop:
+    - dog=cat
+    - yolo=sudo
+```
+
+
+</Step>
+
+</CodeSurferColumnLayout>

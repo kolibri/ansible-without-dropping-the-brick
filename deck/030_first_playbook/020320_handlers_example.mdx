@@ -1,0 +1,41 @@
+<CodeSurferLayout>
+
+```yaml 18:23 subtitle="Start handlers section (same indention level as 'tasks')"
+# site.yml
+- hosts: all
+   tasks:
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+    - name: ensure ssh service is enabled and running
+      service:
+        name: sshd
+        enabled: yes
+        state: started
+
+    handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```diff 10:11,19 subtitle="notify from regular task"
+```
+
+```diff 11[11:21],19[13:23] subtitle="Must match"
+```
+
+```diff 12:16 subtitle="enable the ssh service on startup"
+```
+
+```diff 1:23 title="Full SSH example"
+```
+
+</CodeSurferLayout>

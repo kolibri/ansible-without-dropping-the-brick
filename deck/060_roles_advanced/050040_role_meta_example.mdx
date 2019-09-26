@@ -1,0 +1,21 @@
+<CodeSurferLayout>
+
+```yaml title="Role meta"
+# roles/application/blog/meta/main.yml
+---
+dependencies:
+  - { role: package/php }
+  - { role: package/nginx }
+  - role: mysql
+    vars:
+      mysql_user: marion_mysql
+      mysql_passwort: "{{ blog_mysql_password }}"
+```
+
+```diff 4:5 subtitle="Simple dependency"
+```
+
+```diff 6:9 subtitle="Depend on role with this vars"
+```
+
+</CodeSurferLayout>

@@ -1,0 +1,19 @@
+<CodeSurferLayout>
+
+```ini title="The new template file"
+# gitconfig.j2
+[user]
+    email = {{ git_user_email }}
+    name = {{ git_user_name }}
+[core]
+    excludesfile = {{ ansible_user_dir }}/.gitignore
+    editor = nano
+```
+
+```diff 3[13:33],4[12:32] subtitle="variable from playbook"
+```
+
+```diff 6[20:41] subtitle="variable from facts"
+```
+
+</CodeSurferLayout>

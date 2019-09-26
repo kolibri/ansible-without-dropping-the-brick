@@ -1,0 +1,25 @@
+<CodeSurferLayout>
+
+```yaml title="The ini module"
+- name: ensure git config
+  ini_file:
+    dest: "{{ ansible_user_dir }}/.gitconfig"
+    section: "{{ item.ns }}"
+    option: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - { ns: user, name: email,   value: "{{ git_user_mail }}" }
+    - { ns: user, name: name,    value: "{{ git_user_name }}" }
+    - { ns: push, name: default, value: simple }
+```
+
+```diff 7,4[18:24],8[9:16],9[9:16],10[9:16] subtitle="item can be an object"
+```
+
+```diff 7,5[17:25],8[19:29],9[19:28],10[19:31] subtitle="item can be an object"
+```
+
+```diff 7,6[16:25],8[34:61],9[34:61],10[34:46] subtitle="item can be an object"
+```
+
+</CodeSurferLayout>

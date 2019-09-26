@@ -1,0 +1,26 @@
+<CodeSurferLayout>
+
+```ruby 5:9 title="Assistested quickstart with Vagrant"
+# Vagrantfile
+Vagrant.configure("2") do |config|
+    config.vm.box = "debian/stretch64"
+    config.vm.host_name = "ansible-quickstart.foo"
+    # ansible_local provisioner will run ansible inside the box
+    config.vm.provision "ansible_local" do |ansible|
+        ansible.playbook = "playbook.yml"
+        ansible.verbose = true
+        ansible.install_mode = "pip"
+
+    end
+end
+```
+
+</CodeSurferLayout>
+
+<Notes>
+
+Um die Lernkurve für den Anfang so flach wie möglich zu halten, bietet sich eine Vagrantbox zum rumspielen an.
+
+Mit dieser Konfigurationn können wir sofort loslegen unsere erste Playbooks zu schreiben.
+
+</Notes> 

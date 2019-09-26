@@ -1,0 +1,2127 @@
+import {
+  CodeSurferLayout,
+  CodeSurferColumnLayout,
+  Code,
+  Step,
+} from "code-surfer"
+
+import AlignLeft from './layouts/AlignLeft'
+import Pitfall from './layouts/Pitfall'
+import Tip from './layouts/Tip'
+import { Notes } from 'mdx-deck'
+import { Appear } from '@mdx-deck/components'
+import "prismjs/components/prism-ruby"
+import "prismjs/components/prism-ini"
+import "prismjs/components/prism-yaml"
+
+import myTheme from './layouts/theme'
+export const theme = myTheme
+
+
+
+---
+
+# 27.09.2019
+
+Vor 26 Jahren hat Richard Stallmann das GNU-Projekt angekündigt.
+
+Vor 82 Jahren wurde der Bali Tiger für ausgerottet erklärt.
+
+Der Berliner Tagesspiegel wird 74 Jahre alt.
+
+Der Hochchor des Kölner Doms wurde heute vor genau 697 Jahren geweiht.
+
+
+---
+
+# Ansible without dropping a brick
+
+<Notes>
+
+Herzlich willkommen und so...
+
+Fragen vorab:
+
+Wer verwendet ansible schon?
+
+Wer verwendet Puppet/Chef/Saltstack oder ander Provisionierungstools?
+
+Wer hat mehr als 20/50/100 Systeme in der Infrastruktur
+
+</Notes> 
+ 
+
+
+---
+
+<AlignLeft>
+
+## Who is this guy
+
+Lukas Sadzik <lukas.sadzik@sensiolabs.de>  
+Software Developer & Trainer @ SensioLabsDE  
+Automation Fan  
+@ko_libri  
+
+</AlignLeft>
+
+
+<Notes>
+
+who uses vagrant
+
+Who already used ansible  
+
+who has to handle more than 2/10/20/100  machines?  
+
+Code examples are for demonstration only!
+
+</Notes> 
+
+
+---
+
+## The Problem.
+
+### Or, what we want
+
+<ul>
+    <Appear>
+        <li>scaling</li>
+        <li>maintenance</li>
+        <li>documentation</li>
+        <li>reviewability</li>
+        <li>teamwork and knowledge sharing</li>
+        <li>single point of truth</li>
+        <li>automation</li>
+    </Appear>
+</ul>
+
+<Notes>
+
+scaling: More or less servers
+
+maintenance: update package xxy on all servers
+
+documentation: Which php version do we use?
+
+reviewability: The trainee should also be able to work
+
+teamwork/knowlegde sharing: Devops Guy also wants vacation
+
+single point of truth: Remove the "works on my machine"
+
+automatic: WE WANT IT, WHEN WE NEED IT!
+
+</Notes> 
+
+
+---
+
+## About Ansible
+
+- Open source (GPL) and available on [github](https://github.com/ansible/ansible)
+- Maintained and owned by Redhat
+- written in python
+- configured with YAML files (but still awesome)
+
+<Notes>
+
+Ansible entwickelt sich sehr schnell im Vergleich zu anderen Projekten
+
+</Notes> 
+
+
+---
+
+### How to install ansible
+
+Best solution with lowest effort: Use `pip`.
+
+```bash
+$ (pacman -S)|(apt-get|brew|yum|pip install) pip
+$ pip install ansible
+```
+
+<Notes>
+
+Mit Pip ist sichergestellt, dass ihr die aktuellste Version (sehr schnell) bekommt.
+
+</Notes> 
+
+
+---
+
+### How does ansible work
+
+
+
+---
+
+### The control system
+
+- The only system we interact with directly
+- Has ansible installed
+- Runs our self written playbooks
+
+<Notes>
+
+Ist üblicherweise entweder unser eigener Rechner
+
+oder der CI-server, welcher unser Setup automatisiert.
+
+</Notes> 
+
+
+---
+
+### The managed systems
+
+- The systems, we want to set up
+- They need python (~2.7|~3.5)
+- Usually available via ssh, but other options are also possible (like local access)
+
+<Notes>
+
+Unsere Remote Systeme
+
+</Notes> 
+
+
+---
+
+<Tip>
+
+Use vagrant for a quick playground. All you need is:
+
+```ruby
+    config.vm.provision "ansible_local" do |ansible|
+        ansible.playbook = "playbook.yml"
+        ansible.verbose = true
+        ansible.install_mode = "pip"
+    end
+```
+
+and `$ vagrant provision`
+
+</Tip>
+
+
+<Notes>
+
+Um die Lernkurve für den Anfang so flach wie möglich zu halten, bietet sich eine Vagrantbox zum rumspielen an.
+
+Mit dieser Konfigurationn können wir sofort loslegen unsere erste Playbooks zu schreiben.
+
+</Notes> 
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml title="Hello World in ansible"
+# ./playbook.yml
+- hosts: all
+  tasks:
+    - name: Greet someone
+      shell: echo 'Hello World'
+```
+
+</CodeSurferLayout>
+
+
+
+---
+
+<Pitfall>
+
+Forget about the `ansible` command. 
+
+You will mainly, if not only, use the `ansible-playbook` command.
+
+</Pitfall>
+
+
+
+
+---
+
+<CodeSurferLayout>
+
+```bash title="Our main commands"
+$ ansible-playbook --help
+
+# running a playbook
+$ ansible-playbook site.yml
+```
+
+</CodeSurferLayout>
+
+
+---
+
+
+<CodeSurferLayout>
+
+```bash 1,9:13
+$ ansible-playbook -v site.yml
+Using /etc/ansible/ansible.cfg as config file
+
+PLAY [all] ***
+
+TASK [setup] ***
+ok: [default]
+
+TASK [Greet someone] ***
+changed: [default] => {"changed": true, "cmd": "echo 'Hello World'", 
+"delta": "0:00:00.001252", "end": "2019-08-04 16:28:22.407862", "rc": 0, 
+"start": "2019-08-04 16:28:22.406610", "stderr": "", 
+"stdout": "Hello World", "stdout_lines": ["Hello World"], "warnings": []}
+
+PLAY RECAP ***
+default    : ok=2    changed=1    unreachable=0    failed=0   
+
+
+==> default: Machine 'default' has a post `vagrant up` message. This is a message
+==> default: from the creator of the Vagrantfile, and not from Vagrant itself:
+==> default: 
+==> default: Vanilla Debian box. See https://app.vagrantup.com/debian for help and bug reports
+```
+
+</CodeSurferLayout>
+
+
+---
+
+## First concepts of Ansible
+
+<Notes>
+
+Wir lernen nun die ersten beiden Kernkonzepte von Ansible kennen:
+
+</Notes> 
+
+
+---
+
+### Playbooks
+
+- Yaml-files executed by the `ansible-playbook` command.
+
+- Assigns tasks and roles to hosts.
+
+
+<Notes>
+
+Das, was wir ausführen.
+
+Hier sagen wir, was af welchem Zielsystem ausgeführt werden soll.
+
+</Notes> 
+
+
+---
+
+### Tasks
+
+- One step during the playbook run.
+
+- represent the concrete use of a module.
+
+
+<Notes>
+
+Verhält sich zu modulen ähnlich wie Objekte zu Klassen.
+
+</Notes> 
+
+
+---
+
+#### Task examples
+
+- Ensure that file `$xxy` exists with this content (`template`, `copy`)
+- Ensure service `$abc` is running (`service`)
+- Ensure user `foobar` exists and has no sudo privileges (`user`)
+- Deploy `$app` to prod (`deploy_helper`)
+- Run script `take_world_leadership.sh` (`shell`, `command`)
+
+<Notes>
+
+Das Ziel eines Tasks ist es, einnen bestimmten Zustand sicher zu stellen.
+
+Ist der Zustand nicht vorhanden, versucht der Task, diese umzusetzen. Ansonste macht der Tasks einfach nichts.
+
+Weitere Beispiele:
+
+- ensure directory (file)
+- ensure git repo checked out at $ (git)
+- boot this ec2 instance (ec2)
+
+</Notes>
+
+
+---
+
+<Tip>
+
+Always name your tasks!  
+Name them unique and meaningfull.
+
+This allows you to use the  `--start-at-task` option of `ansible-playbook`
+
+</Tip>
+
+
+<Notes>
+
+Macht es einfach! 
+
+</Notes> 
+
+
+---
+
+## Writing our first Playbook
+
+Install git and place a config file for the user
+
+
+
+---
+
+<CodeSurferLayout>
+
+```ini title="The config file"
+# ./gitconfig.dist
+[user]
+    email = tamara.tester@testingen.foo
+    name = Tamara Tester
+[core]
+    excludesfile = /home/vagrant/.gitignore
+    editor = vi
+```
+
+</CodeSurferLayout>
+
+<Notes>
+
+Das ist unser configfile, welches wir ablegen wollen
+
+</Notes> 
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml title="Our first playbook"
+# ./playbook.yml 
+- hosts: all
+  tasks:
+    - name: "ensure git is installed"
+      become: true
+      package:
+        name: git
+        state: present
+    - name: ensure git configs
+      copy:
+        src: gitconfig.dist
+        dest: /home/vagrant/.gitconfig
+```
+
+```diff 2 subtitle="address hosts"
+```
+
+```diff 4:8 subtitle="ensures packages"
+```
+
+```diff 9:12 subtitle="copy files from control to remote"
+```
+
+```diff 5 subtitle="and what is this?"
+```
+
+</CodeSurferLayout>
+
+
+<Notes>
+
+Und dies unser erstes Playbook
+
+Zuerst müssen wir sagen, welche Zielsysteme wir ansprechen wollen
+
+Unter `tasks` können wir dann unsere tasks platzieren.
+
+Wie hier das das `package` Modul, welches sich je nach Betriebssystem versucht denn entsprechenden Packetmanager zu nehmen um die angegebenen Pakete zu installieren.
+
+Unn mit dem Copy-Modul kopieren wir Dateien vom Kontrol- zum Zielsystem.
+
+Soweit so klar, bleibt nur noch das hier: 
+
+</Notes> 
+
+
+---
+
+### Understanding `become`
+
+
+
+---
+
+<AlignLeft>
+
+`become` is the mechanism to run tasks as another user than the current.
+
+For simplification, you could say "when I use `sudo` on the shell, I use `become` in ansible"
+
+</AlignLeft>
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml title="become default configuration"
+become: false
+become_user: root 
+become_method: sudo 
+become_flags: ~
+```
+
+```diff 1 subtitle="activates privilege escalation"
+```
+
+```diff 2 subtitle="specify user to become"
+```
+
+```diff 3 subtitle="define method to become user"
+```
+
+```diff 4 subtitle="add extra flags"
+```
+
+</CodeSurferLayout>
+
+
+<Notes>
+
+
+
+</Notes>
+
+
+---
+
+<Pitfall>
+
+Setting `become_(user|method|flags)` does NOT imply `become: true`.
+
+</Pitfall>
+
+
+---
+
+<Tip>
+
+`become` can do more than gaining admin priviliges.
+
+You can use it, to perform tasks as another user on your system.
+
+Keep this in mind, when you have to deal with multiple user accounts.
+
+</Tip>
+
+
+---
+
+<CodeSurferLayout>
+
+
+```bash title="become on the command line"
+$ ansible-playbook --become true --become-user=tamara \
+    --become-method=su --ask-become-pass
+```
+
+```diff 1[20:33] subtitle="toggle become for the entire run"
+```
+
+```diff 1[34:54] subtitle="Run playbook as this user"
+```
+
+```diff 2[4:23] subtitle="handy, when sudo ist not installed"
+```
+
+```diff 2[24:99] subtitle="Ask for tamaras password"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+### Introduction into facts
+
+
+---
+
+<CodeSurferLayout>
+
+```yml 4 subtitle="print out all kown facts"
+# ./site.yml
+- hosts: all
+  tasks:
+    - debug: var=hostvars
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash 6 subtitle="We need this" title="Formatted run log"
+TASK [debug] ***
+ok: [default] => {
+    "hostvars": {
+        "default": {
+            // [...],
+            "ansible_user_dir": "/home/vagrant",
+            "ansible_user_gecos": "Vagrant Default User,,,",
+            "ansible_user_gid": 1000,
+            "ansible_user_id": "vagrant",
+            "ansible_user_shell": "/bin/bash",
+            "ansible_user_uid": 1000,
+            "ansible_userspace_architecture": "x86_64",
+            "ansible_userspace_bits": "64",
+            // [...],
+        }
+    }
+}
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```diff
+ - name: ensure git configs
+   copy:
+     src: gitconfig.dist
+-    dest: /home/vagrant/.gitconfig
++    dest: "{{ ansible_user_dir }}/.gitconfig"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<Pitfall>
+
+We have to write valid YAML files.
+
+This means, we have to surround Jinja2 statements with quotation marks:
+
+`dest: {{ my_fact }}/foo` will cause an error.
+
+`dest: "{{ my_fact }}/foo"`  will do the job.
+
+</Pitfall>
+
+
+---
+
+## Templates
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml 3:5 subtitle="define variable inside playbook"
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: tamara@tester.de
+    git_user_name: tamara Tester
+  tasks:
+    - name: ensure git configs
+      template:
+        src: gitconfig.j2
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+```
+
+```diff 7:10 subtitle="ensure parsed template on remote"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```ini title="The new template file"
+# gitconfig.j2
+[user]
+    email = {{ git_user_email }}
+    name = {{ git_user_name }}
+[core]
+    excludesfile = {{ ansible_user_dir }}/.gitignore
+    editor = nano
+```
+
+```diff 3[13:33],4[12:32] subtitle="variable from playbook"
+```
+
+```diff 6[20:41] subtitle="variable from facts"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml title="Facts are global per run"
+- hosts: all
+  vars:
+    my_var: foobar
+  tasks:
+    - debug: var=my_var
+
+- hosts: all
+  tasks:
+    - debug: var=my_var
+```
+
+```diff 1:5 title="Facts are global per run" subtitle='{ "my_var": "foobar" }'
+```
+
+```diff 6:9 title="Facts are global per run" subtitle='{ "my_var": "VARIABLE IS NOT DEFINED!" }'
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash 1[20:99],3 title="Pass variables from command line"
+$ ansible-playbook --extra-vars git_user_name=torben \
+                   # or with shortcut
+                   -e git_user_email=torben@tester.foo 
+```
+
+</CodeSurferLayout>
+
+
+---
+
+## Loops
+
+
+---
+
+### Extending our first Playbook
+
+Install zsh and place some aliases
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml 6:8 subtitle="inline style for package related modules"
+- hosts: all
+  tasks:
+    - name: ensure git and zsh is installed
+      become: true
+      package:
+        name:
+          - git
+          - zsh
+        state: present
+
+    - name: ensure useful aliases for zsh
+      lineinfile:
+        create: yes
+        dest: "{{ ansible_user_dir }}/.zshrc"
+        line: "alias {{ item }}"
+      loop:
+        - "dog=cat"
+        - "yolo=sudo"
+```
+
+```diff 15:18 subtitle="regular style with loop/item"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash title="Result of the template task"
+# ~/.zshrc 
+alias dog=cat
+alias yolo=sudo
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<Tip>
+
+There is a module for that!
+
+[Trust me](https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html)
+
+</Tip>
+
+<Notes> 
+
+2832 Modules!!!
+
+</Notes> 
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml title="The ini module"
+- name: ensure git config
+  ini_file:
+    dest: "{{ ansible_user_dir }}/.gitconfig"
+    section: "{{ item.ns }}"
+    option: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - { ns: user, name: email,   value: "{{ git_user_mail }}" }
+    - { ns: user, name: name,    value: "{{ git_user_name }}" }
+    - { ns: push, name: default, value: simple }
+```
+
+```diff 7,4[18:24],8[9:16],9[9:16],10[9:16] subtitle="item can be an object"
+```
+
+```diff 7,5[17:25],8[19:29],9[19:28],10[19:31] subtitle="item can be an object"
+```
+
+```diff 7,6[16:25],8[34:61],9[34:61],10[34:46] subtitle="item can be an object"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+[Loops Chapter in the Ansible docs](https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html)
+
+
+
+<Notes> 
+
+Verschachtelte Loops
+
+Loopvariable umbenennen
+
+Pausen zwischen Iterationen
+
+Migrieren von `with_item`, etc. aus alten playbooks
+
+</Notes> 
+
+
+---
+
+## Handlers
+
+
+---
+
+<Tip>
+
+Call ansible at least with the first verbosity level (`ansible-playbook -v`).
+
+This will show you details about the executed tasks, that may have useful informations.
+
+</Tip>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash title="Formatted run log"
+TASK [ensure git is installed] ***
+[WARNING]: Could not find aptitude. Using apt-get instead
+
+ok: [localhost] => {
+    "cache_update_time": 1564940055,
+    "cache_updated": false,
+    "changed": false
+}
+
+TASK [ensure aliases for zsh] ***
+changed: [localhost] => (item=dog=cat) => {
+    "ansible_loop_var": "item",
+    "backup": "",
+    "changed": true,
+    "item": "dog=cat",
+    "msg": "line added"
+}
+```
+
+```diff 7,14 subtitle="Ansible knows, if it should do something"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+## Next step
+
+Install ssh service, disable root login and ensure the service is running.
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml 18:23 subtitle="Start handlers section (same indention level as 'tasks')"
+# site.yml
+- hosts: all
+   tasks:
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+    - name: ensure ssh service is enabled and running
+      service:
+        name: sshd
+        enabled: yes
+        state: started
+
+    handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```diff 10:11,19 subtitle="notify from regular task"
+```
+
+```diff 11[11:21],19[13:23] subtitle="Must match"
+```
+
+```diff 12:16 subtitle="enable the ssh service on startup"
+```
+
+```diff 1:23 title="Full SSH example"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+``` bash 1[1:4],4 subtitle="Tasks run first..."
+TASK [ensure root login is disabled] ***
+changed: [localhost] => {
+    "backup": "",
+    "changed": true,
+    "msg": "line added"
+}
+
+RUNNING HANDLER [restart ssh] ***
+changed: [localhost] => {
+    "changed": true,
+    "name": "sshd",
+    "state": "started",
+    "status": {
+        "ActiveEnterTimestamp": "Sun 2019-08-04 17:33:53 GMT",
+        "...": "...",
+        "ActiveEnterTimestampMonotonic": "2392038",
+        "WatchdogTimestampMonotonic": "2392037",
+        "WatchdogUSec": "0"
+    }
+}
+
+PLAY RECAP ***
+localhost: ok=7  changed=2  unreachable=0  failed=0  skipped=0  rescued=0  ignored=0   
+
+Connection to 127.0.0.1 closed.
+```
+
+```diff 8[1:16],10 subtitle="... and handlers at last."
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<Tip>
+
+Handlers are just tasks. You can use the same modules here.
+
+</Tip>
+
+
+---
+
+<Pitfall>
+
+Do not use `state: restarted` of the `service` module at task level.
+
+This is, what handlers are for!
+
+If you really have to restart inside tasks, use the `meta` Module:
+
+```yaml
+- name: I need restarting now
+  meta: flush_handlers
+```
+
+</Pitfall>
+
+
+---
+
+## Roles
+
+- Make things reusable
+- Provide tasks, templates, etc.
+- Use a predefined directory structure
+
+
+---
+
+<CodeSurferLayout>
+
+```bash title="Creating a new role"
+$ ansible-galaxy init --init-path=roles zsh
+- zsh was created successfully
+```
+
+```bash subtitle="ehm, too much..."
+$ ansible-galaxy init --init-path=roles zsh
+- zsh was created successfully
+$ tree
+.
+├── roles
+│   └── zsh
+│       ├── defaults
+│       │   └── main.yml
+│       ├── files
+│       ├── handlers
+│       │   └── main.yml
+│       ├── meta
+│       │   └── main.yml
+│       ├── README.md
+│       ├── handlers
+│       │   └── main.yml
+│       ├── tasks
+│       │   └── main.yml
+│       ├── templates
+│       ├── tests
+│       │   ├── inventory
+│       │   └── test.yml
+│       └── vars
+│           └── main.yml
+└── playbook.yml
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash 2:5 title="All we need for a role"
+.
+├── roles
+│   └── zsh
+│       └── tasks
+│           └── main.yml
+└── playbook.yml
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferColumnLayout sizes={[1, 1]}>
+
+<Step title="Create zsh role">
+
+```yaml 1,7:10,13:14,15:24 
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  tasks:
+    - name: ensure packages are installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+          - zsh
+        state: present
+
+    - name: ensure aliases for zsh
+      lineinfile:
+        dest: "{{ ansible_user_dir }}/.zshrc"
+        line: "ALIAS {{ item }}"
+        create: yes
+      loop:
+        - dog=cat
+        - yolo=sudo
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml
+```
+</Step>
+
+<Step subtitle="from playbook to roles tasks file">
+
+```yaml 6:7
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  roles:
+    - zsh
+  tasks:
+    - name: ensure packages are installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml 1
+# roles/zsh/tasks/main.yml
+- name: ensure zsh is installed
+  become: true
+  package:
+    name: zsh
+    state: present
+
+- name: ensure aliases for zsh
+  lineinfile:
+    dest: "{{ ansible_user_dir }}/.zshrc"
+    line: "ALIAS {{ item }}"
+    create: yes
+  loop:
+    - dog=cat
+    - yolo=sudo
+```
+
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 1, 1]}>
+
+<Step title="Create ssh role">
+
+```yaml 33:58
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  roles:
+    - zsh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - openssh-server
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+
+    - name: ensure root login is disabled
+      become: yes
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: PermitRootLogin no
+        regexp: "^PermitRootLogin.*$"
+      notify:
+        - restart ssh
+
+    - name: ensure ssh service is enabled
+      service:
+        name: sshd
+        enabled: yes
+      notify:
+        - restart ssh
+
+  handlers:
+    - name: restart ssh
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+```
+
+```yaml
+```
+
+```yaml
+```
+
+</Step>
+
+<Step subtitle="Tasks to tasks/, handlers to handlers/">
+
+```yaml 8
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: lukas.sadzik@sensiolabs.de
+    git_user_name: Lukas Sadzik
+  roles:
+    - zsh
+    - ssh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+```
+
+```yaml 1
+# roles/ssh/tasks/main.yml
+- name: ensure root login is disabled
+  become: yes
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: PermitRootLogin no
+    regexp: "^PermitRootLogin.*$"
+  notify:
+    - restart ssh
+
+- name: ensure ssh service is enabled
+  service:
+    name: sshd
+    enabled: yes
+  notify:
+    - restart ssh
+```
+
+```yaml 1
+# roles/ssh/handlers/main.yml
+- name: restart ssh
+  become: yes
+  service:
+    name: sshd
+    state: restarted
+```
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 1, 1]}>
+
+<Step title="Create git role">
+
+```
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: tamara.tester@testingen.de
+    git_user_name: Tamara Tester
+  roles:
+    - zsh
+    - ssh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+```
+
+```yaml
+```
+
+```yaml
+```
+
+</Step>
+
+<Step subtitle="vars goes to defaults/main.yml">
+
+```yaml
+# playbook.yml
+- hosts: all
+  roles:
+    - zsh
+    - ssh
+    - git
+```
+
+```yaml 1
+# roles/git/tasks/main.yml
+- name: ensure git is installed
+  become: true
+  package:
+    name:
+      - git
+    state: present
+
+- name: ensure git config
+  ini_file:
+    dest: "{{ ansible_user_dir }}/.gitconfig"
+    section: "{{ item.ns }}"
+    option: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - 
+      ns: user, 
+      name: email, 
+      value: "{{ git_user_email }}" 
+    -
+      ns: user, 
+      name: name, 
+      value: "{{ git_user_name }}" 
+    -
+      ns: push, 
+      name: default,
+      value: simple 
+    - 
+      ns: core
+      name: excludesfile
+      value: "{{ ansible_user_dir }}/.gitignore"
+```
+
+```yaml 1
+# roles/git/defaults/main.yml
+git_user_email: tamara.tester@testingen.de
+git_user_name: Tamara Tester
+```
+
+</Step>
+
+<Step subtitle="o_O">
+
+```diff 6
+```
+
+```diff 1[99:100]
+```
+
+```diff 1[13:21]
+```
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+
+
+---
+
+### `defaults` vs `vars`
+
+
+---
+
+### `defaults`
+
+- "Public" configuration
+- Can be overwritten
+- Should provide "good" default values
+
+
+---
+
+### `vars`
+
+- "Private" configuration
+- for variables based on facts
+- use them together with `include_vars`
+
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 3, 2]}>
+
+<Step>
+
+```bash 9[12:99],10[12:99],11[12:99],12[12:99] title="vars files"
+$ tree
+.
+├── roles
+│   └── ssh
+│       ├── handlers
+│       │   └── main.yml
+│       ├── tasks
+│       │   └── main.yml
+│       └── vars
+│           ├── Archlinux.yml
+│           ├── Debian.yml
+│           └── Ubuntu.yml
+└── playbook.yml
+```
+
+```yaml 5 title="tasks"
+---
+# roles/ssh/tasks/main.yml
+- name: include os-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: install ssh package
+  package: 
+    name: {{ ssh_package }}
+    state: present
+
+---
+# roles/ssh/tasks/handlers.yml
+- name: restart ssh service
+  service: 
+    name: {{ ssh_service }}
+    state: restarted
+```
+
+```yaml 5 title="vars"
+---
+# roles/ssh/vars/Archlinux.yml
+ssh_package: ssh
+ssh_service: sshd
+
+---
+# roles/ssh/vars/Debian.yml
+ssh_package: openssh-server
+ssh_service: sshd
+
+---
+# roles/ssh/vars/Ubuntu.yml
+ssh_package: openssh-server
+ssh_service: ssh
+```
+
+</Step>
+
+<Step>
+
+```diff title="vars files" 10[17:25],11[17:22],12[17:22]
+```
+
+```diff title="tasks" 4
+```
+
+```diff title="vars" 2[18:27],7[18:24],12[18:24]
+```
+
+</Step>
+
+<Step>
+
+```diff title="vars files" 99
+```
+
+```diff title="tasks" 8[11:27],15[11:27]
+```
+
+```diff title="vars" 3[1:11],4[1:11],8[1:11],9[1:11],13[1:11],14[1:11]
+```
+
+</Step>
+
+
+</CodeSurferColumnLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+
+```bash
+$ ansible-playbook --syntax-check
+
+$ ansible-playbook --check --diff
+```
+
+```diff 1[20:99] subtitle="Linting is alway useful"
+```
+
+```diff 3[20:27] subtitle="Do not perform changes, try to show changes"
+```
+
+```diff 3[28:99] subtitle="Show differences in files and templates"
+```
+
+
+</CodeSurferLayout>
+
+
+---
+
+## The Inventory
+
+### The place to define our target machines
+
+
+---
+
+<CodeSurferLayout>
+
+```ini
+# inventory/hosts
+frontend.foo
+backend.foo
+database.foo
+```
+
+```ini 2[15:99],3[15:99] subtitle="Connection configs" subtitle="Inventory should only contain connection settings"
+# inventory/hosts
+frontend.foo  ansible_connection=ssh ansible_host=192.168.12.34
+backend.foo   ansible_connection=ssh
+database.foo
+```
+
+```ini subtitle="Group hosts"
+# inventory/hosts
+[webserver]
+frontend.foo  ansible_connection=ssh ansible_host=192.168.12.34
+backend.foo   ansible_connection=ssh
+[database]
+database.foo
+```
+
+```ini subtitle="Set facts for groups"
+# inventory/hosts
+[webserver]
+frontend.foo ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+
+[database]
+database.foo
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+
+```bash
+$ ansible-playbook --inventory inventory/hosts site.yml
+
+$ ansible-playbook -i w01stage.foo,w02stage.foo --user sophia --ask-pass
+
+$ ansible-playbook -i localhost, -c local site.yml
+```
+
+```diff 1[20:99] subtitle="Set inventory file"
+```
+
+```diff 3[20:22] subtitle="shortcut"
+```
+
+```diff 3[23:48] subtitle="list of hosts, instead of file"
+```
+
+```diff 3[49:62] subtitle="user for connection"
+```
+
+```diff 3[63:99] subtitle="ask for password (if you do not have keys already)"
+```
+
+```diff 5[20:33] subtitle="It is still a list of hosts, with the comma"
+```
+
+```diff 5[34:99] subtitle="Provision the control system"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```ini title="Set inventory in config file"
+# ansible.cfg
+[defaults]
+inventory = inventory/hosts
+```
+
+```ini subtitle="...and a lot more"
+# ansible.cfg
+[defaults]
+inventory = inventory/hosts
+roles_path = roles
+host_key_checking = False
+remote_user = tamaratester
+log_path = logs/ansible.log
+private_key_file = /path/to/file
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferColumnLayout  sizes={[1, 1]}>
+
+<Step title="Variable-files for our inventory">
+
+```bash
+.
+├── hosts
+├── group_vars
+│   ├── all.yml
+│   ├── database.yml
+│   └── webserver.yml
+└── host_vars/
+    ├── backend.foo.yml
+    ├── database.foo.yml
+    └── frontend.foo.yml
+```
+
+```ini
+# development
+[webserver]
+frontend.foo ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+
+[database]
+database.foo
+```
+
+</Step>
+
+<Step subtitle="Configure specific hosts">
+
+```diff 7[4:20],8[8:20],9[8:20],10[8:20]
+```
+
+```diff 3[1:12],4[1:11],9[1:12]
+```
+
+</Step>
+
+
+<Step subtitle="grouped based config to ./group_vars">
+
+```diff 3[4:40],5[8:40],6[8:40]
+```
+
+```diff 2,8
+```
+
+</Step>
+
+<Step subtitle="the host_vars and group_vars directory needs to be in the same directory as the inventory file">
+
+```diff 3[4:40],7[4:20],2[4:40]
+```
+
+```ini
+```
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+
+---
+
+<Tip>
+
+Try to avoid ` host_vars/`. 
+
+Thinking in groups will be more scalable.
+
+It also tends to be more organized
+
+</Tip>
+
+
+---
+
+<Tip>
+
+Place only connection variables in inventory file
+
+</Tip>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash 2[4:20],3[4:20],4[4:20] title="A usual setup" subtitle="deployment environments"
+.
+├── development
+├── production
+├── staging
+├── group_vars
+│   ├── all.yml
+│   ├── database.yml
+│   ├── development.yml
+│   ├── production.yml
+│   ├── staging.yml
+│   └── webserver.yml
+└── host_vars/
+ ```
+
+```diff 5[4:20],7[8:20],11[8:20] subtitle="services"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+[Dynamic Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html)
+
+
+
+---
+
+# Roles Advanced
+
+
+---
+
+# Organizing roles
+
+
+---
+
+<CodeSurferLayout>
+
+```bash 2[8:99],9[8:99],17 title="grouped by 'size'"
+├── roles
+│   ├── application
+│   │   ├── blog
+│   │   │   └── tasks
+│   │   ├── shop
+│   │   │   └── tasks
+│   │   └── website
+│   │       └── tasks
+│   └── package
+│       ├── mysql
+│       │   └── tasks
+│       ├── nginx
+│       │   └── tasks
+│       └── php
+│           └── tasks
+└── site.yml
+```
+
+</CodeSurferLayout>
+
+
+---
+
+# Role meta
+
+As everything is some kind of global during a play, you can (and may) use variables, handlers and so from other roles.  
+Saying this, we now have roles, that depend on each other.
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml title="Role meta"
+# roles/application/blog/meta/main.yml
+---
+dependencies:
+  - { role: package/php }
+  - { role: package/nginx }
+  - role: mysql
+    vars:
+      mysql_user: marion_mysql
+      mysql_passwort: "{{ blog_mysql_password }}"
+```
+
+```diff 4:5 subtitle="Simple dependency"
+```
+
+```diff 6:9 subtitle="Depend on role with this vars"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml 1:4 title="The include_role module"
+# a task somewhere in a playbook run
+- name: ensure aur packages
+  include_role:
+    name: aur
+  vars:
+    pkg_name: fritzing
+```
+
+```diff 5:6 subtitle="pass variables"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferColumnLayout sizes={[1, 1]}>
+
+<Step subtitle="Choose a different file with tasks_from" title="vhost example">
+
+```yaml 5 
+# a task somewhere in a playbook run
+- name: ensure vhost
+  include_role:
+    name: nginx
+    tasks_from: vhost
+  vars:
+    doc_root: /var/www/project/
+```
+
+```bash 6[16:40]
+.
+└── roles
+    └── nginx
+        └── tasks
+            ├── main.yml
+            └── vhost.yml
+```
+
+</Step>
+
+</CodeSurferColumnLayout>
+
+
+---
+
+# `include_role` vs `include_tasks`
+
+- `include_role` has access to defaults/vars.
+- `include_tasks` not.
+
+
+
+---
+
+<CodeSurferLayout>
+
+```yaml title="React to errors"
+- name: update pacman
+  pacman: 
+    update_cache: yes
+    upgrade: yes
+  register: pacman_update_result
+  ignore_errors: True
+
+- name: repair broken pacman
+  include: repair_pacman.yml
+  when: pacman_update_result is failed
+```
+
+```diff 6 subtitle="we don't care for this one"
+```
+
+```diff 5,10 subtitle="save and check for result"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash title="It is common, to have several playbooks"
+.
+├── roles/
+├── playbooks/
+│   ├── database.yml
+│   └── application.yml
+└── site.yml
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+
+```yaml title="One, that includes all the others ..."
+# site.yml
+---
+- import_playbook: playbooks/database.yml
+- import_playbook: playbooks/application.yml
+
+```
+
+```yaml title="... and performs global tasks" subtitle="checking for python to execute ansible"
+---
+- hosts: all
+  gather_facts: false
+  tags: [always]
+  pre_tasks:
+    - name: ensure python
+      raw: sudo bash -c "test -e /usr/bin/python || (pacman -S --noconfirm python)"
+
+- import_playbook: playbooks/database.yml
+- import_playbook: playbooks/application.yml
+
+```
+
+</CodeSurferLayout>
+
+
+---
+
+# Next steps to discover
+
+- [Dynamic Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html)
+- [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
+- [Loops](https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html)
+
+
+---
+
+# Rate this talk
+
+![https://joind.in/talk/efc78](./joindin_qr_sflive2019.png)
+
+https://joind.in/talk/efc78
+
+---
+
+# Thank you for listening
+
+https://github.com/kolibri/ansible-without-dropping-the-brick
+
+---
+
+# Ask me anything
+
+---
+

@@ -1,0 +1,21 @@
+<CodeSurferLayout>
+
+```yaml title="Facts are global per run"
+- hosts: all
+  vars:
+    my_var: foobar
+  tasks:
+    - debug: var=my_var
+
+- hosts: all
+  tasks:
+    - debug: var=my_var
+```
+
+```diff 1:5 title="Facts are global per run" subtitle='{ "my_var": "foobar" }'
+```
+
+```diff 6:9 title="Facts are global per run" subtitle='{ "my_var": "VARIABLE IS NOT DEFINED!" }'
+```
+
+</CodeSurferLayout>

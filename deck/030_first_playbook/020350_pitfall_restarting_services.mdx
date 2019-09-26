@@ -1,0 +1,14 @@
+<Pitfall>
+
+Do not use `state: restarted` of the `service` module at task level.
+
+This is, what handlers are for!
+
+If you really have to restart inside tasks, use the `meta` Module:
+
+```yaml
+- name: I need restarting now
+  meta: flush_handlers
+```
+
+</Pitfall>

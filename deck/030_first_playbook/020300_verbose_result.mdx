@@ -1,0 +1,26 @@
+<CodeSurferLayout>
+
+```bash title="Formatted run log"
+TASK [ensure git is installed] ***
+[WARNING]: Could not find aptitude. Using apt-get instead
+
+ok: [localhost] => {
+    "cache_update_time": 1564940055,
+    "cache_updated": false,
+    "changed": false
+}
+
+TASK [ensure aliases for zsh] ***
+changed: [localhost] => (item=dog=cat) => {
+    "ansible_loop_var": "item",
+    "backup": "",
+    "changed": true,
+    "item": "dog=cat",
+    "msg": "line added"
+}
+```
+
+```diff 7,14 subtitle="Ansible knows, if it should do something"
+```
+
+</CodeSurferLayout>

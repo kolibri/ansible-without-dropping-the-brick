@@ -1,0 +1,49 @@
+<CodeSurferLayout>
+
+
+```yaml 5:9 subtitle="Could be a vm, clound instance, etc. created before in the run."
+# site.yml
+- hosts: localhost
+  tasks:
+    - name: Add a new host
+      add_host:
+        hostname: '{{ new_ip }}'
+        groups: [test-vm]
+        ansible_ssh_host: test-vm.foo
+        doc_root: /var/www/project
+
+- hosts: test-vm
+  roles:
+    - webserver
+```
+
+```diff 11:13 subtitle="Complete new run (in the same playbook file)"
+```
+
+```diff 7,11 subtitle="Assigned by group name"
+```
+
+```yaml subtitle="And as a bonus, we wait for the host to become available"
+# site.yml
+- hosts: localhost
+  tasks:
+    - name: Add a new host
+      add_host:
+        hostname: '{{ new_ip }}'
+        groups: [test-vm]
+        ansible_ssh_host: test-vm.foo
+        doc_root: /var/www/project
+    - name: Wait for new host
+      wait_for:
+        host: "{{ new_ip }}"
+        port: 22
+        delay: 10
+
+- hosts: test-vm
+  roles:
+    - webserver
+```
+
+```diff 1:18 title="Tada.."
+```
+</CodeSurferLayout>

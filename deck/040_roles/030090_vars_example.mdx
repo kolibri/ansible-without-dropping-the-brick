@@ -1,0 +1,86 @@
+<CodeSurferColumnLayout  sizes={[1, 3, 2]}>
+
+<Step>
+
+```bash 9[12:99],10[12:99],11[12:99],12[12:99] title="vars files"
+$ tree
+.
+├── roles
+│   └── ssh
+│       ├── handlers
+│       │   └── main.yml
+│       ├── tasks
+│       │   └── main.yml
+│       └── vars
+│           ├── Archlinux.yml
+│           ├── Debian.yml
+│           └── Ubuntu.yml
+└── playbook.yml
+```
+
+```yaml 5 title="tasks"
+---
+# roles/ssh/tasks/main.yml
+- name: include os-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: install ssh package
+  package: 
+    name: {{ ssh_package }}
+    state: present
+
+---
+# roles/ssh/tasks/handlers.yml
+- name: restart ssh service
+  service: 
+    name: {{ ssh_service }}
+    state: restarted
+```
+
+```yaml 5 title="vars"
+---
+# roles/ssh/vars/Archlinux.yml
+ssh_package: ssh
+ssh_service: sshd
+
+---
+# roles/ssh/vars/Debian.yml
+ssh_package: openssh-server
+ssh_service: sshd
+
+---
+# roles/ssh/vars/Ubuntu.yml
+ssh_package: openssh-server
+ssh_service: ssh
+```
+
+</Step>
+
+<Step>
+
+```diff title="vars files" 10[17:25],11[17:22],12[17:22]
+```
+
+```diff title="tasks" 4
+```
+
+```diff title="vars" 2[18:27],7[18:24],12[18:24]
+```
+
+</Step>
+
+<Step>
+
+```diff title="vars files" 99
+```
+
+```diff title="tasks" 8[11:27],15[11:27]
+```
+
+```diff title="vars" 3[1:11],4[1:11],8[1:11],9[1:11],13[1:11],14[1:11]
+```
+
+</Step>
+
+
+</CodeSurferColumnLayout>

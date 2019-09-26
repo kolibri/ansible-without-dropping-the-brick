@@ -1,0 +1,34 @@
+<CodeSurferLayout>
+
+``` bash 1[1:4],4 subtitle="Tasks run first..."
+TASK [ensure root login is disabled] ***
+changed: [localhost] => {
+    "backup": "",
+    "changed": true,
+    "msg": "line added"
+}
+
+RUNNING HANDLER [restart ssh] ***
+changed: [localhost] => {
+    "changed": true,
+    "name": "sshd",
+    "state": "started",
+    "status": {
+        "ActiveEnterTimestamp": "Sun 2019-08-04 17:33:53 GMT",
+        "...": "...",
+        "ActiveEnterTimestampMonotonic": "2392038",
+        "WatchdogTimestampMonotonic": "2392037",
+        "WatchdogUSec": "0"
+    }
+}
+
+PLAY RECAP ***
+localhost: ok=7  changed=2  unreachable=0  failed=0  skipped=0  rescued=0  ignored=0   
+
+Connection to 127.0.0.1 closed.
+```
+
+```diff 8[1:16],10 subtitle="... and handlers at last."
+```
+
+</CodeSurferLayout>

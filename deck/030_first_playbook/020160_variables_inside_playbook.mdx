@@ -1,0 +1,19 @@
+<CodeSurferLayout>
+
+```yaml 3:5 subtitle="define variable inside playbook"
+# site.yml
+- hosts: all
+  vars:
+    git_user_email: tamara@tester.de
+    git_user_name: tamara Tester
+  tasks:
+    - name: ensure git configs
+      template:
+        src: gitconfig.j2
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+```
+
+```diff 7:10 subtitle="ensure parsed template on remote"
+```
+
+</CodeSurferLayout>

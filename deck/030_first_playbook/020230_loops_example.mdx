@@ -1,0 +1,27 @@
+<CodeSurferLayout>
+
+```yaml 6:8 subtitle="inline style for package related modules"
+- hosts: all
+  tasks:
+    - name: ensure git and zsh is installed
+      become: true
+      package:
+        name:
+          - git
+          - zsh
+        state: present
+
+    - name: ensure useful aliases for zsh
+      lineinfile:
+        create: yes
+        dest: "{{ ansible_user_dir }}/.zshrc"
+        line: "alias {{ item }}"
+      loop:
+        - "dog=cat"
+        - "yolo=sudo"
+```
+
+```diff 15:18 subtitle="regular style with loop/item"
+```
+
+</CodeSurferLayout>

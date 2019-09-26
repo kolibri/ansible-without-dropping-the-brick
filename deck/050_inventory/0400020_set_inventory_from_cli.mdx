@@ -1,0 +1,33 @@
+<CodeSurferLayout>
+
+
+```bash
+$ ansible-playbook --inventory inventory/hosts site.yml
+
+$ ansible-playbook -i w01stage.foo,w02stage.foo --user sophia --ask-pass
+
+$ ansible-playbook -i localhost, -c local site.yml
+```
+
+```diff 1[20:99] subtitle="Set inventory file"
+```
+
+```diff 3[20:22] subtitle="shortcut"
+```
+
+```diff 3[23:48] subtitle="list of hosts, instead of file"
+```
+
+```diff 3[49:62] subtitle="user for connection"
+```
+
+```diff 3[63:99] subtitle="ask for password (if you do not have keys already)"
+```
+
+```diff 5[20:33] subtitle="It is still a list of hosts, with the comma"
+```
+
+```diff 5[34:99] subtitle="Provision the control system"
+```
+
+</CodeSurferLayout>

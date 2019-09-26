@@ -1,0 +1,11 @@
+<CodeSurferLayout>
+
+```diff
+ - name: ensure git configs
+   copy:
+     src: gitconfig.dist
+-    dest: /home/vagrant/.gitconfig
++    dest: "{{ ansible_user_dir }}/.gitconfig"
+```
+
+</CodeSurferLayout>

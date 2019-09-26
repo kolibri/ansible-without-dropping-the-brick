@@ -1,0 +1,11 @@
+<Pitfall>
+
+We have to write valid YAML files.
+
+This means, we have to surround Jinja2 statements with quotation marks:
+
+`dest: {{ my_fact }}/foo` will cause an error.
+
+`dest: "{{ my_fact }}/foo"`  will do the job.
+
+</Pitfall>

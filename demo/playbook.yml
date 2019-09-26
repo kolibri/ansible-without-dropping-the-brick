@@ -1,0 +1,5 @@
+# ./playbook.yml
+- hosts: all
+  tasks:
+    - name: Greet someone
+      shell: echo 'Hello World'

@@ -1,0 +1,38 @@
+<CodeSurferLayout>
+
+```ini
+# inventory/hosts
+frontend.foo
+backend.foo
+database.foo
+```
+
+```ini 2[15:99],3[15:99] subtitle="Connection configs" subtitle="Inventory should only contain connection settings"
+# inventory/hosts
+frontend.foo  ansible_connection=ssh ansible_host=192.168.12.34
+backend.foo   ansible_connection=ssh
+database.foo
+```
+
+```ini subtitle="Group hosts"
+# inventory/hosts
+[webserver]
+frontend.foo  ansible_connection=ssh ansible_host=192.168.12.34
+backend.foo   ansible_connection=ssh
+[database]
+database.foo
+```
+
+```ini subtitle="Set facts for groups"
+# inventory/hosts
+[webserver]
+frontend.foo ansible_host=192.168.12.34
+backend.foo
+[webserver:vars]
+ansible_connection=ssh
+
+[database]
+database.foo
+```
+
+</CodeSurferLayout>

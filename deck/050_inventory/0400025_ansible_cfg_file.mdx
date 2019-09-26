@@ -1,0 +1,20 @@
+<CodeSurferLayout>
+
+```ini title="Set inventory in config file"
+# ansible.cfg
+[defaults]
+inventory = inventory/hosts
+```
+
+```ini subtitle="...and a lot more"
+# ansible.cfg
+[defaults]
+inventory = inventory/hosts
+roles_path = roles
+host_key_checking = False
+remote_user = tamaratester
+log_path = logs/ansible.log
+private_key_file = /path/to/file
+```
+
+</CodeSurferLayout>

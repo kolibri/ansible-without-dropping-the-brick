@@ -1,0 +1,58 @@
+<CodeSurferLayout>
+
+```yaml 3:7 title="The assert module" subtitle="assert will fail the run based on conditions"
+# roles/aur/tasks/main.yml
+---
+- assert:
+    that:
+      - pkg_name is defined
+      - makepkg_nonroot_user is defined
+      - makepkg_nonroot_user != false
+
+- name: AUR | get metadata from AurJson api
+  uri:
+    url: "https://aur.archlinux.org/rpc.php?type=info&arg={{ pkg_name }}"
+    return_content: yes
+    timeout: 6
+  register: api_info
+
+- assert:
+    that:
+      - api_info.status == 200
+      - api_info.json is defined
+      - api_info.json.type == 'info'
+      - api_info.json.resultcount == 1
+      - api_info.json.results is defined
+
+- name: AUR | get installed package version
+  shell: "pacman -Q | grep {{ pkg_name }} | cut -d' ' -f2"
+  register: pacman_query_result
+
+- name: AUR | {{ pkg_name }} | get package git repo
+  become: true
+  become_user: "{{ makepkg_nonroot_user }}"
+  git:
+    repo: "https://aur.archlinux.org/{{ pkg_name }}.git"
+    dest: /tmp/{{ pkg_name }}
+  when: api_info.json.results.Version != pacman_query_result.stdout
+  register: extracted_pkg
+
+- name: AUR | {{ pkg_name }} | build package, including missing dependencies
+  become: true
+  become_user: "{{ makepkg_nonroot_user }}"
+  command: makepkg --noconfirm --noprogressbar -mfs
+  args:
+    chdir: /tmp/{{ pkg_name }}
+  when: extracted_pkg is changed
+  register: aur_makepkg_result
+
+- name: AUR | {{ pkg_name }} | install newly-built aur package with pacman
+  become: true
+  shell: pacman --noconfirm --noprogressbar --needed -U *.pkg.tar.xz
+  args:
+    chdir: "/tmp/{{ pkg_name }}"
+  register: pacman_install_result
+  when: aur_makepkg_result is changed
+```
+
+</CodeSurferLayout>

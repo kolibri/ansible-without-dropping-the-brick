@@ -1,0 +1,122 @@
+<CodeSurferColumnLayout  sizes={[1, 1, 1]}>
+
+<Step title="Create git role">
+
+```
+# playbook.yml
+- hosts: all
+  vars:
+    git_user_email: tamara.tester@testingen.de
+    git_user_name: Tamara Tester
+  roles:
+    - zsh
+    - ssh
+  tasks:
+    - name: ensure git is installed
+      become: true
+      package:
+        name:
+          - git
+        state: present
+
+    - name: ensure git config
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.gitconfig"
+        section: "{{ item.ns }}"
+        option: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - 
+          ns: user, 
+          name: email, 
+          value: "{{ git_user_email }}" 
+        -
+          ns: user, 
+          name: name, 
+          value: "{{ git_user_name }}" 
+        -
+          ns: push, 
+          name: default,
+          value: simple 
+        - 
+          ns: core
+          name: excludesfile
+          value: "{{ ansible_user_dir }}/.gitignore"
+```
+
+```yaml
+```
+
+```yaml
+```
+
+</Step>
+
+<Step subtitle="vars goes to defaults/main.yml">
+
+```yaml
+# playbook.yml
+- hosts: all
+  roles:
+    - zsh
+    - ssh
+    - git
+```
+
+```yaml 1
+# roles/git/tasks/main.yml
+- name: ensure git is installed
+  become: true
+  package:
+    name:
+      - git
+    state: present
+
+- name: ensure git config
+  ini_file:
+    dest: "{{ ansible_user_dir }}/.gitconfig"
+    section: "{{ item.ns }}"
+    option: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - 
+      ns: user, 
+      name: email, 
+      value: "{{ git_user_email }}" 
+    -
+      ns: user, 
+      name: name, 
+      value: "{{ git_user_name }}" 
+    -
+      ns: push, 
+      name: default,
+      value: simple 
+    - 
+      ns: core
+      name: excludesfile
+      value: "{{ ansible_user_dir }}/.gitignore"
+```
+
+```yaml 1
+# roles/git/defaults/main.yml
+git_user_email: tamara.tester@testingen.de
+git_user_name: Tamara Tester
+```
+
+</Step>
+
+<Step subtitle="o_O">
+
+```diff 6
+```
+
+```diff 1[99:100]
+```
+
+```diff 1[13:21]
+```
+
+</Step>
+
+</CodeSurferColumnLayout>
+

@@ -1,0 +1,22 @@
+---
+- name: ensure ssh server is installed
+  become: true
+  package:
+    name:  openssh-server
+    state: present
+
+- name: ensure root login is disabled
+  become: yes
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: PermitRootLogin no
+    regexp: "^PermitRootLogin.*$"
+  notify:
+    - restart ssh
+
+- name: ensure ssh service is enabled
+  service:
+    name: sshd
+    enabled: yes
+  notify:
+    - restart ssh

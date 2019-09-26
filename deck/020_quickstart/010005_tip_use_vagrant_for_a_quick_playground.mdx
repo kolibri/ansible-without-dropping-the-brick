@@ -1,0 +1,24 @@
+<Tip>
+
+Use vagrant for a quick playground. All you need is:
+
+```ruby
+    config.vm.provision "ansible_local" do |ansible|
+        ansible.playbook = "playbook.yml"
+        ansible.verbose = true
+        ansible.install_mode = "pip"
+    end
+```
+
+and `$ vagrant provision`
+
+</Tip>
+
+
+<Notes>
+
+Um die Lernkurve für den Anfang so flach wie möglich zu halten, bietet sich eine Vagrantbox zum rumspielen an.
+
+Mit dieser Konfigurationn können wir sofort loslegen unsere erste Playbooks zu schreiben.
+
+</Notes> 

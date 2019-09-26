@@ -1,0 +1,16 @@
+# site.yml
+---
+- hosts: all
+  tasks:
+    - debug: var=hostvars
+#    - name: ensure git is installed
+#      become: true
+#      package: 
+#        name: git
+#        state: present
+#
+#    - name: ensure git configs
+#      copy:
+#        src: gitconfig.dist
+#        dest: /home/vagrant/.gitconfig
+#

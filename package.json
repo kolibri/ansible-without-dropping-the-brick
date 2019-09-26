@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "deck": "node concat.js",
+    "deck:watch": "onchange \"deck/**/*.mdx\" -- npm run deck",
+    "start": "mdx-deck -p 8317 deck.mdx",
+    "build": "mdx-deck build -d dist deck.mdx ",
+    "pdf": "npm website-pdf http://localhost:8317/print -w 1920 -h 1080 -o deck.pdf",
+    "test": "echo \"there are no tests\""
+  },
+  "devDependencies": {
+    "code-surfer": "2.0.0-alpha.10",
+    "concatenate-files": "^0.1.1",
+    "glob": "^7.1.4",
+    "mdx-deck": "^2.4.0",
+    "onchange": "^6.1.0"
+  },
+  "name": "my-deck",
+  "dependencies": {}
+}

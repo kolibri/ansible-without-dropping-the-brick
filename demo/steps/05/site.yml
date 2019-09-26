@@ -1,0 +1,7 @@
+# site.yml
+---
+- hosts: all
+  roles:
+    - zsh
+    - git
+    - ssh

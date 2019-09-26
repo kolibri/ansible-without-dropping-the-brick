@@ -1,0 +1,29 @@
+
+<CodeSurferLayout>
+
+```bash 1,9:13
+$ ansible-playbook -v site.yml
+Using /etc/ansible/ansible.cfg as config file
+
+PLAY [all] ***
+
+TASK [setup] ***
+ok: [default]
+
+TASK [Greet someone] ***
+changed: [default] => {"changed": true, "cmd": "echo 'Hello World'", 
+"delta": "0:00:00.001252", "end": "2019-08-04 16:28:22.407862", "rc": 0, 
+"start": "2019-08-04 16:28:22.406610", "stderr": "", 
+"stdout": "Hello World", "stdout_lines": ["Hello World"], "warnings": []}
+
+PLAY RECAP ***
+default    : ok=2    changed=1    unreachable=0    failed=0   
+
+
+==> default: Machine 'default' has a post `vagrant up` message. This is a message
+==> default: from the creator of the Vagrantfile, and not from Vagrant itself:
+==> default: 
+==> default: Vanilla Debian box. See https://app.vagrantup.com/debian for help and bug reports
+```
+
+</CodeSurferLayout>

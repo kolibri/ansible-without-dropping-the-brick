@@ -1,0 +1,26 @@
+<CodeSurferLayout>
+
+
+```yaml title="One, that includes all the others ..."
+# site.yml
+---
+- import_playbook: playbooks/database.yml
+- import_playbook: playbooks/application.yml
+
+```
+
+```yaml title="... and performs global tasks" subtitle="checking for python to execute ansible"
+---
+- hosts: all
+  gather_facts: false
+  tags: [always]
+  pre_tasks:
+    - name: ensure python
+      raw: sudo bash -c "test -e /usr/bin/python || (pacman -S --noconfirm python)"
+
+- import_playbook: playbooks/database.yml
+- import_playbook: playbooks/application.yml
+
+```
+
+</CodeSurferLayout>

@@ -1,0 +1,26 @@
+<CodeSurferColumnLayout sizes={[1, 1]}>
+
+<Step subtitle="Choose a different file with tasks_from" title="vhost example">
+
+```yaml 5 
+# a task somewhere in a playbook run
+- name: ensure vhost
+  include_role:
+    name: nginx
+    tasks_from: vhost
+  vars:
+    doc_root: /var/www/project/
+```
+
+```bash 6[16:40]
+.
+└── roles
+    └── nginx
+        └── tasks
+            ├── main.yml
+            └── vhost.yml
+```
+
+</Step>
+
+</CodeSurferColumnLayout>

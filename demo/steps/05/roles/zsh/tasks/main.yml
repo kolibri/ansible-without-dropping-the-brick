@@ -1,0 +1,15 @@
+---
+- name: ensure zsh is installed
+  become: true
+  package:
+    name: zsh
+    state: present
+
+- name: ensure aliases for zsh
+  lineinfile:
+    dest: "{{ ansible_user_dir }}/.zshrc"
+    line: "ALIAS {{ item }}"
+    create: yes
+  loop:
+    - dog=cat
+    - yolo=sudo
