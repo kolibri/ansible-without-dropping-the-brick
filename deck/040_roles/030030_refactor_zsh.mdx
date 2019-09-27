@@ -10,7 +10,7 @@
     git_user_name: Lukas Sadzik
   tasks:
     - name: ensure packages are installed
-      become: true
+      become: yes
       package:
         name:
           - openssh-server
@@ -91,7 +91,7 @@
     - zsh
   tasks:
     - name: ensure packages are installed
-      become: true
+      become: yes
       package:
         name:
           - openssh-server
@@ -149,7 +149,7 @@
 ```yaml 1
 # roles/zsh/tasks/main.yml
 - name: ensure zsh is installed
-  become: true
+  become: yes
   package:
     name: zsh
     state: present

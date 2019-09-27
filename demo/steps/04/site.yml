@@ -6,7 +6,7 @@
     git_user_name: Lukas Sadzik
   tasks:
     - name: ensure git is installed
-      become: true
+      become: yes
       package:
         name:
           - openssh-server

@@ -29,7 +29,7 @@
   register: pacman_query_result
 
 - name: AUR | {{ pkg_name }} | get package git repo
-  become: true
+  become: yes
   become_user: "{{ makepkg_nonroot_user }}"
   git:
     repo: "https://aur.archlinux.org/{{ pkg_name }}.git"
@@ -38,7 +38,7 @@
   register: extracted_pkg
 
 - name: AUR | {{ pkg_name }} | build package, including missing dependencies
-  become: true
+  become: yes
   become_user: "{{ makepkg_nonroot_user }}"
   command: makepkg --noconfirm --noprogressbar -mfs
   args:
@@ -47,7 +47,7 @@
   register: aur_makepkg_result
 
 - name: AUR | {{ pkg_name }} | install newly-built aur package with pacman
-  become: true
+  become: yes
   shell: pacman --noconfirm --noprogressbar --needed -U *.pkg.tar.xz
   args:
     chdir: "/tmp/{{ pkg_name }}"

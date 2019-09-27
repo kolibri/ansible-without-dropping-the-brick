@@ -1,12 +1,32 @@
-#### Task examples
+<CodeSurferLayout>
 
-- Ensure that file `$xxy` exists with this content (`template`, `copy`)
-- Ensure service `$abc` is running (`service`)
-- Ensure user `foobar` exists and has no sudo privileges (`user`)
-- Deploy `$app` to prod (`deploy_helper`)
-- Run script `take_world_leadership.sh` (`shell`, `command`)
+```yaml title="Task examples"
+- name: "ensure something is installed"
+  package:
+    name: something
+- name: ensure some file
+  copy:
+    src: some_file
+    dest: /tmp/somefile
+```
+
+```diff 1[3:40],4[3:25] subtitle="task name"
+```
+
+```diff 2[3:9],5[3:6] subtitle="module"
+```
+
+```diff 3,6,7 subtitle="module parameters"
+```
+
+</CodeSurferLayout>
 
 <Notes>
+
+Task besteht aus: Module name
+
+und parameters
+
 
 Das Ziel eines Tasks ist es, einnen bestimmten Zustand sicher zu stellen.
 
@@ -14,6 +34,12 @@ Ist der Zustand nicht vorhanden, versucht der Task, diese umzusetzen. Ansonste m
 
 Weitere Beispiele:
 
+
+-- Ensure that file `$xxy` exists with this content (`template`, `copy`)
+-- Ensure service `$abc` is running (`service`)
+-- Ensure user `foobar` exists and has no sudo privileges (`user`)
+-- Deploy `$app` to prod (`deploy_helper`)
+-- Run script `take_world_leadership.sh` (`shell`, `command`)
 - ensure directory (file)
 - ensure git repo checked out at $ (git)
 - boot this ec2 instance (ec2)

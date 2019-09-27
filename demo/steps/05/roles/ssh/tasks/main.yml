@@ -1,6 +1,6 @@
 ---
 - name: ensure ssh server is installed
-  become: true
+  become: yes
   package:
     name:  openssh-server
     state: present

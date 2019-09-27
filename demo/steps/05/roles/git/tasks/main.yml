@@ -1,6 +1,6 @@
 ---
 - name: ensure git is installed
-  become: true
+  become: yes
   package:
     name: git
     state: present

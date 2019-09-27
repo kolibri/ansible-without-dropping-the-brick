@@ -28,13 +28,11 @@ $ tree
   package: 
     name: {{ ssh_package }}
     state: present
-
----
-# roles/ssh/tasks/handlers.yml
 - name: restart ssh service
   service: 
     name: {{ ssh_service }}
-    state: restarted
+    enabled: yes
+    state: started
 ```
 
 ```yaml 5 title="vars"
@@ -74,7 +72,7 @@ ssh_service: ssh
 ```diff title="vars files" 99
 ```
 
-```diff title="tasks" 8[11:27],15[11:27]
+```diff title="tasks" 8[11:27],12[11:27]
 ```
 
 ```diff title="vars" 3[1:11],4[1:11],8[1:11],9[1:11],13[1:11],14[1:11]

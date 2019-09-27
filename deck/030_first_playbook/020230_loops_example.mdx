@@ -4,7 +4,7 @@
 - hosts: all
   tasks:
     - name: ensure git and zsh is installed
-      become: true
+      become: yes
       package:
         name:
           - git

@@ -1,7 +1,7 @@
 <CodeSurferLayout>
 
 
-```bash
+```bash title="Defining inventory from command line"
 $ ansible-playbook --inventory inventory/hosts site.yml
 
 $ ansible-playbook -i w01stage.foo,w02stage.foo --user sophia --ask-pass
@@ -27,7 +27,7 @@ $ ansible-playbook -i localhost, -c local site.yml
 ```diff 5[20:33] subtitle="It is still a list of hosts, with the comma"
 ```
 
-```diff 5[34:99] subtitle="Provision the control system"
+```diff 5[34:41] subtitle="Provision the control system"
 ```
 
 </CodeSurferLayout>
