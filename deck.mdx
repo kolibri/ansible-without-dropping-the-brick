@@ -21,19 +21,6 @@ export const theme = myTheme
 
 ---
 
-# 27.09.2019
-
-Vor 26 Jahren hat Richard Stallmann das GNU-Projekt angekündigt.
-
-Vor 82 Jahren wurde der Bali Tiger für ausgerottet erklärt.
-
-Der Berliner Tagesspiegel wird 74 Jahre alt.
-
-Der Hochchor des Kölner Doms wurde heute vor genau 697 Jahren geweiht.
-
-
----
-
 # Ansible without dropping a brick
 
 <Notes>
@@ -118,6 +105,25 @@ automatic: Und wir wollen all das dann haben, wenn wir es brauchen.
 
 ---
 
+### Quick tool overview
+
+
+- [Chef](https://www.chef.io/)
+- [Puppet](https://puppet.com/)
+- [SaltStack](https://www.saltstack.com/)
+- [Ansible](https://www.ansible.com) (this is, what this talk is about)
+
+<Notes>
+
+Puppet und Chef sind schon etwas länger auf der Welt.
+
+Puppet und Chef benötigen beide einen Agent auf den Zielsystemen, Ansible dagegen nicht.
+
+</Notes> 
+
+
+---
+
 ## About Ansible
 
 - Open source (GPL) and available on [github](https://github.com/ansible/ansible)
@@ -190,6 +196,36 @@ Unsere Remote Systeme
 
 ---
 
+<CodeSurferLayout>
+
+```ruby 5:9 title="Assistested quickstart with Vagrant"
+# Vagrantfile
+Vagrant.configure("2") do |config|
+    config.vm.box = "debian/stretch64"
+    config.vm.host_name = "ansible-quickstart.foo"
+    # ansible_local provisioner will run ansible inside the box
+    config.vm.provision "ansible_local" do |ansible|
+        ansible.playbook = "playbook.yml"
+        ansible.verbose = true
+        ansible.install_mode = "pip"
+
+    end
+end
+```
+
+</CodeSurferLayout>
+
+<Notes>
+
+Um die Lernkurve für den Anfang so flach wie möglich zu halten, bietet sich eine Vagrantbox zum rumspielen an.
+
+Mit dieser Konfigurationn können wir sofort loslegen unsere erste Playbooks zu schreiben.
+
+</Notes> 
+
+
+---
+
 <Tip>
 
 Use vagrant for a quick playground. All you need is:
@@ -230,6 +266,20 @@ Mit dieser Konfigurationn können wir sofort loslegen unsere erste Playbooks zu 
 
 </CodeSurferLayout>
 
+
+
+---
+
+<CodeSurferLayout>
+
+```bash title="Handling the vagrantbox"
+# starting the box
+$ vagrant up
+# run the provisioning manually
+$ vagrant provision
+```
+
+</CodeSurferLayout>
 
 
 ---
@@ -723,6 +773,19 @@ This means, we have to surround Jinja2 statements with quotation marks:
 ```
 
 </CodeSurferLayout>
+
+
+---
+
+<Tip>
+
+Always add the `.j2` file extension to your templates.
+
+Also add the ending fo the target file format, if there is one.
+
+Lets speak it for itself: `vhost.conf.j2`
+
+</Tip>
 
 
 ---
@@ -1904,6 +1967,33 @@ Place only connection variables in inventory file
 
 ---
 
+# How to scale inventory
+
+
+---
+
+# layers in our infrastructure
+
+- by application
+- by deployment stage
+- by geographical region
+- by security zone
+- by hardware specifications
+- ...
+
+
+---
+
+# Our example 
+
+## Deployment Stage & Service
+
+- Stages:  development, production, staging
+- Services: website, database
+
+
+---
+
 <CodeSurferLayout>
 
 ```bash 2[4:20],3[4:20],4[4:20] title="A usual setup" subtitle="deployment environments"
@@ -1922,6 +2012,45 @@ Place only connection variables in inventory file
  ```
 
 ```diff 5[4:20],7[8:20],11[8:20] subtitle="services"
+```
+
+</CodeSurferLayout>
+
+
+---
+
+<CodeSurferLayout>
+
+```bash title="multiple inventory dirs"
+.
+└── inventories
+    ├── development
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   └── inventory
+    ├── production
+    │   ├── group_vars
+    │   │   ├── all.yml
+    │   │   ├── database.yml
+    │   │   └── frontend.yml
+    │   ├── host_vars/
+    │   └── inventory
+    └── staging
+        ├── group_vars
+        │   ├── all.yml
+        │   ├── database.yml
+        │   └── frontend.yml
+        ├── host_vars/
+        └── inventory
+```
+
+```diff 3[8:40],10[8:40],17[8:40] subtitle="deployment environment"
+```
+
+```diff 6[16:40],7[16:40],13[16:40],14[16:40],20[16:40],21[16:40] subtitle="services"
 ```
 
 </CodeSurferLayout>
@@ -2023,6 +2152,68 @@ dependencies:
 
 ---
 
+<CodeSurferLayout>
+
+```yaml 3:7 title="The assert module" subtitle="assert will fail the run based on conditions"
+# roles/aur/tasks/main.yml
+---
+- assert:
+    that:
+      - pkg_name is defined
+      - makepkg_nonroot_user is defined
+      - makepkg_nonroot_user != false
+
+- name: AUR | get metadata from AurJson api
+  uri:
+    url: "https://aur.archlinux.org/rpc.php?type=info&arg={{ pkg_name }}"
+    return_content: yes
+    timeout: 6
+  register: api_info
+
+- assert:
+    that:
+      - api_info.status == 200
+      - api_info.json is defined
+      - api_info.json.type == 'info'
+      - api_info.json.resultcount == 1
+      - api_info.json.results is defined
+
+- name: AUR | get installed package version
+  shell: "pacman -Q | grep {{ pkg_name }} | cut -d' ' -f2"
+  register: pacman_query_result
+
+- name: AUR | {{ pkg_name }} | get package git repo
+  become: yes
+  become_user: "{{ makepkg_nonroot_user }}"
+  git:
+    repo: "https://aur.archlinux.org/{{ pkg_name }}.git"
+    dest: /tmp/{{ pkg_name }}
+  when: api_info.json.results.Version != pacman_query_result.stdout
+  register: extracted_pkg
+
+- name: AUR | {{ pkg_name }} | build package, including missing dependencies
+  become: yes
+  become_user: "{{ makepkg_nonroot_user }}"
+  command: makepkg --noconfirm --noprogressbar -mfs
+  args:
+    chdir: /tmp/{{ pkg_name }}
+  when: extracted_pkg is changed
+  register: aur_makepkg_result
+
+- name: AUR | {{ pkg_name }} | install newly-built aur package with pacman
+  become: yes
+  shell: pacman --noconfirm --noprogressbar --needed -U *.pkg.tar.xz
+  args:
+    chdir: "/tmp/{{ pkg_name }}"
+  register: pacman_install_result
+  when: aur_makepkg_result is changed
+```
+
+</CodeSurferLayout>
+
+
+---
+
 <CodeSurferColumnLayout sizes={[1, 1]}>
 
 <Step subtitle="Choose a different file with tasks_from" title="vhost example">
@@ -2088,6 +2279,11 @@ dependencies:
 
 ---
 
+# More on playbooks
+
+
+---
+
 <CodeSurferLayout>
 
 ```bash title="It is common, to have several playbooks"
@@ -2134,6 +2330,66 @@ dependencies:
 
 ---
 
+<CodeSurferLayout>
+
+
+```yaml 5:9 title="Adding a host during the run" subtitle="Could be a vm, clound instance, etc. created before in the run."
+# site.yml
+- hosts: localhost
+  tasks:
+    - name: Add a new host
+      add_host:
+        hostname: '{{ new_ip }}'
+        groups: [test-vm]
+        ansible_ssh_host: test-vm.foo
+        doc_root: /var/www/project
+
+- hosts: test-vm
+  roles:
+    - webserver
+```
+
+```diff 11:13 subtitle="Complete new run (in the same playbook file)"
+```
+
+```diff 7,11 subtitle="Assigned by group name"
+```
+
+```yaml subtitle="And as a bonus, we wait for the host to become available"
+# site.yml
+- hosts: localhost
+  tasks:
+    - name: Add a new host
+      add_host:
+        hostname: '{{ new_ip }}'
+        groups: [test-vm]
+        ansible_ssh_host: test-vm.foo
+        doc_root: /var/www/project
+    - name: Wait for new host
+      wait_for:
+        host: "{{ new_ip }}"
+        port: 22
+        delay: 10
+
+- hosts: test-vm
+  roles:
+    - webserver
+```
+
+```diff 1:18 title="Tada.."
+```
+</CodeSurferLayout>
+
+
+---
+
+# Supported Cloud Services
+
+Alicloud, Group, Amazon, Atomic, Azure, Centurylink, Cloudscale, Cloudstack, Digital_Ocean, Dimensiondata, Docker, Google, Hcloud, Heroku, Huawei, Kubevirt, Linode, Lxc, Lxd, Memset, Misc, Oneandone, Online, Opennebula, Openstack, Oracle, Ovh, Ovirt, Packet, Podman, Profitbricks, Pubnub, Rackspace, Scaleway, Smartos, Softlayer, Spotinst, Univention, Vmware, Vultr, Webfaction, Xenserver
+
+
+---
+
 # Next steps to discover
 
 - [Dynamic Inventory](https://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html)
@@ -2143,11 +2399,22 @@ dependencies:
 
 ---
 
-# Rate this talk
+# Tools good to know
 
-![https://joind.in/talk/efc78](./joindin_qr_sflive2019.png)
+- vagrant
+    - most easy dev environment
+- packer
+    - will become handy when creating cloud images
 
-https://joind.in/talk/efc78
+
+---
+
+# Provision everything
+
+- Your desktop environment (lot more dependencies)
+- Raspberry Pi projects (chipset architecture change)
+- this small side project, that needs some love (It's like a kata)
+
 
 ---
 

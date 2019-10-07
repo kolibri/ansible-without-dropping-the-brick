@@ -1,6 +1,8 @@
-# Ansible ohne Fettnäpchen.
+# Ansible without dropping the brick
 
 A beginner talk about [Ansible](http://ansible.com)
+
+[Open slides](https://kolibri.github.io/ansible-without-dropping-the-brick/)
 
 ## Commands 
 

@@ -5,7 +5,7 @@
     "deck": "node concat.js",
     "deck:watch": "onchange \"deck/**/*.mdx\" -- npm run deck",
     "start": "mdx-deck -p 8317 deck.mdx",
-    "build": "mdx-deck build -d dist deck.mdx ",
+    "build": "mdx-deck build -d docs deck.mdx ",
     "pdf": "npm website-pdf http://localhost:8317/print -w 1920 -h 1080 -o deck.pdf",
     "test": "echo \"there are no tests\""
   },
